@@ -2,6 +2,7 @@ import {Component} from "@angular/core";
 import {NavController} from "ionic-angular";
 import {Game, Player} from "../../app/customer.interface";
 import {AbstractControl, FormArray, FormBuilder, FormGroup, Validators} from "@angular/forms";
+import {GamePage} from "../about/about";
 
 @Component({
   selector: 'page-home',
@@ -58,6 +59,7 @@ export class CadPlayers {
       }
     }
 
+    this.navCtrl.setRoot(GamePage, {game: this.game});
 
   }
 
