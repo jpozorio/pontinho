@@ -1,0 +1,34 @@
+<ion-header>
+  <ion-navbar>
+    <ion-title>Pontinho</ion-title>
+  </ion-navbar>
+</ion-header>
+
+<ion-content padding>
+  <div class="container">
+    <div class="row">
+      <form [formGroup]="formPlayers">
+        <div formArrayName="formPlayers">
+          <div *ngFor="let player of formPlayers.controls.formPlayers.controls; let i=index" class="panel panel-default">
+            <div class="panel-heading">
+              <span>Player {{i + 1}}</span>
+              <span class="glyphicon glyphicon-remove pull-right" *ngIf="formPlayers.controls.formPlayers.controls.length > 1" (click)="removePlayer(i)"></span>
+            </div>
+            <div class="panel-body" [formGroupName]="i">
+              <player [group]="formPlayers.controls.formPlayers.controls[i]"></player>
+            </div>
+          </div>
+
+        </div>
+      </form>
+    </div>
+  </div>
+
+
+  <div class="margin-20">
+    <button ion-button (click)="addPlayer()">Add player</button>
+    <button ion-button  (click)="finishCadPlayers()">Finish</button>
+  </div>
+
+
+</ion-content>
