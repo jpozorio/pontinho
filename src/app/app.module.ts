@@ -11,6 +11,7 @@ import {TabsPage} from "../pages/tabs/tabs";
 import {StatusBar} from "@ionic-native/status-bar";
 import {SplashScreen} from "@ionic-native/splash-screen";
 import {PlayerComponent} from "./player.component";
+import {HandComponent} from "./hand.component";
 
 @NgModule({
   declarations: [
@@ -19,7 +20,8 @@ import {PlayerComponent} from "./player.component";
     ContactPage,
     CadPlayers,
     TabsPage,
-    PlayerComponent
+    PlayerComponent,
+    HandComponent
   ],
   imports: [
     BrowserModule,

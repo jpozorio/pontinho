@@ -1,6 +1,8 @@
-<div [formGroup]="playerForm">
-    <div class="form-group col-xs-6">
-      <ion-label>{name}</ion-label>
-      <ion-input type="numeric" class="form-control" formControlName="pontos" placeholder="Pontos"></ion-input>
-    </div>
+<div [formGroup]="handForm" *ngIf="player">
+  <ion-item>
+    <ion-label>{{player.name}}</ion-label>
+    <ion-input type="numeric" class="form-control" placeholder="Pontos" formControlName="pontos"></ion-input>
+    <ion-buttons>Estourou e voltou</ion-buttons>
+    <ion-buttons>Estourou e saiu</ion-buttons>
+  </ion-item>
 </div>

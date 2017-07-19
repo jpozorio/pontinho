@@ -7,5 +7,18 @@
 </ion-header>
 
 <ion-content padding>
+  <form [formGroup]="handForm" *ngIf="game.players">
+    <div formArrayName="handForm">
+      <div *ngFor="let player of game.players; let i=index" class="panel panel-default">
+        <div class="panel-heading">
+          <span>{{player.name}}</span>
+          <span class="glyphicon glyphicon-remove pull-right"></span>
+        </div>
+        <div class="panel-body" [formGroupName]="i">
+          <hand [group]="handForm.controls.handForm.controls[i]"></hand>
+        </div>
+      </div>
 
+    </div>
+  </form>
 </ion-content>
