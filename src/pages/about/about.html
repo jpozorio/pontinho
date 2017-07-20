@@ -11,14 +11,26 @@
     <div formArrayName="handForm">
       <div *ngFor="let player of game.players; let i=index" class="panel panel-default">
         <div class="panel-heading">
-          <span>{{player.name}}</span>
-          <span class="glyphicon glyphicon-remove pull-right"></span>
-        </div>
-        <div class="panel-body" [formGroupName]="i">
-          <hand [group]="handForm.controls.handForm.controls[i]"></hand>
+          <div [formGroup]="handForm" *ngIf="player">
+            <ion-grid>
+              <ion-row>
+                <ion-col style="size: 25%">
+                  <ion-label>{{player.name}}</ion-label>
+                </ion-col>
+                <ion-col style="size: 10%">
+                  <ion-input type="number" class="form-control" placeholder="Pontos"></ion-input>
+                </ion-col>
+                <ion-col style="size: 30%">
+                  <button ion-button>EVP</button>
+                </ion-col>
+                <ion-col style="size: 30%">
+                  <button ion-button>ES</button>
+                </ion-col>
+              </ion-row>
+            </ion-grid>
+          </div>
         </div>
       </div>
-
     </div>
   </form>
 </ion-content>

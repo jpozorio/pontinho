@@ -1,5 +1,13 @@
 <div [formGroup]="playerForm">
-    <div class="form-group col-xs-6">
-      <ion-input type="text" class="form-control" formControlName="name" placeholder="Nome"></ion-input>
-    </div>
+  <ion-grid>
+    <ion-row>
+      <ion-col   style="size: 50%">
+        <ion-input type="text" class="form-control" formControlName="name" placeholder="Nome"></ion-input>
+      </ion-col>
+      <ion-col   style="size: 50%">
+        <ion-input type="number" class="form-control" formControlName="vlrPago" placeholder="Valor pago"></ion-input>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+
 </div>

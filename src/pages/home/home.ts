@@ -21,6 +21,7 @@ export class CadPlayers {
     this.formPlayers = this._fb.group(
       {
         name: ['', [Validators.required]],
+        vlrPago: ['0', [Validators.required]],
         formPlayers: this._fb.array([])
       }
     );
@@ -30,7 +31,8 @@ export class CadPlayers {
 
   initPlayer() {
     return this._fb.group({
-      name: ['', Validators.required]
+      name: ['', Validators.required],
+      vlrPago: ['0', [Validators.required]],
     });
   }
 
