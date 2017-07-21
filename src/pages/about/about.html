@@ -7,9 +7,9 @@
 </ion-header>
 
 <ion-content padding>
-  <form [formGroup]="handForm" *ngIf="game.players">
+  <form [formGroup]="handForm" *ngIf="game.playersAtGame">
     <div formArrayName="handForm">
-      <div *ngFor="let player of game.players; let i=index" class="panel panel-default">
+      <div *ngFor="let player of game.playersAtGame; let i=index" class="panel panel-default">
         <div class="panel-heading">
           <div [formGroup]="handForm" *ngIf="player">
             <ion-grid>
@@ -18,13 +18,10 @@
                   <ion-label>{{player.name}}</ion-label>
                 </ion-col>
                 <ion-col style="size: 10%">
-                  <ion-input type="number" class="form-control" placeholder="Pontos"></ion-input>
+                  <ion-input type="number" class="form-control" placeholder="Pontos" (ionChange)="setPontos(player, i)" name="pontos"></ion-input>
                 </ion-col>
                 <ion-col style="size: 30%">
-                  <button ion-button>EVP</button>
-                </ion-col>
-                <ion-col style="size: 30%">
-                  <button ion-button>ES</button>
+                  <button ion-button (click)="estourou(i)">Estourou</button>
                 </ion-col>
               </ion-row>
             </ion-grid>

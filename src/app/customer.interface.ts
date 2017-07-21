@@ -3,21 +3,25 @@ export class Player {
   valuePaid: number;
 }
 
+export class Match {
+  handsOfMatch: Hand[];
+}
+
 export class Hand {
   player: Player;
   score: number;
 }
 
 export class Game {
-  players: Player[];
-  hands: Hand[];
+  playersAtGame: Player[];
+  matches: Match[];
 
   constructor() {
-    this.players = [];
-    this.hands = [];
+    this.playersAtGame = [];
+    this.matches = [];
   }
 
   addPlayer(player: Player) {
-    this.players.push(player);
+    this.playersAtGame.push(player);
   }
 }

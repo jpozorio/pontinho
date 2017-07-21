@@ -1,7 +1,7 @@
 import {Component} from "@angular/core";
 import {NavController, NavParams} from "ionic-angular";
-import {Game} from "../../app/customer.interface";
-import {FormBuilder, FormGroup} from "@angular/forms";
+import {Game, Hand, Match, Player} from "../../app/customer.interface";
+import {FormArray, FormBuilder, FormGroup} from "@angular/forms";
 
 @Component({
   selector: 'page-about',
@@ -10,10 +10,14 @@ import {FormBuilder, FormGroup} from "@angular/forms";
 export class GamePage {
 
   game: Game;
+  currentMatch: Match;
   public handForm: FormGroup;
 
   constructor(public navCtrl: NavController, private _fb: FormBuilder, public navParams: NavParams) {
     this.game = navParams.get('game');
+    this.currentMatch = new Match();
+    this.currentMatch.handsOfMatch = [];
+    this.game.matches.push(this.currentMatch);
   }
 
   ngOnInit() {
@@ -23,4 +27,22 @@ export class GamePage {
       }
     );
   }
+
+  estourou(player: Player) {
+    let hand = new Hand();
+    hand.player = player;
+    hand.score = 100;
+    this.currentMatch.handsOfMatch.push(hand)
+  }
+
+  setPontos(player: Player, i: number, searchTerm) {
+    console.log(searchTerm);
+    const control = <FormArray>this.handForm.controls['handForm'];
+    let hand = new Hand();
+    hand.player = player;
+    console.log(control);
+    // hand.score = control.controls[i].get('pontos').value;
+    // this.currentMatch.handsOfMatch.push(hand)
+  }
+
 }
