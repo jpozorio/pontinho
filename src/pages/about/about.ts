@@ -23,9 +23,21 @@ export class GamePage {
   ngOnInit() {
     this.handForm = this._fb.group(
       {
+        pontos: ['0'],
+        estourou: [false],
         handForm: this._fb.array([])
       }
     );
+
+    // for(let player of this.game.playersAtGame){
+    //   this.addHand(player)
+    // }
+  }
+
+  addHand(player: Player) {
+    const control = <FormArray>this.handForm.controls['handForm'];
+    const addrCtrl = this.initHand(player);
+    control.push(addrCtrl);
   }
 
   estourou(player: Player) {
@@ -35,8 +47,7 @@ export class GamePage {
     this.currentMatch.handsOfMatch.push(hand)
   }
 
-  setPontos(player: Player, i: number, searchTerm) {
-    console.log(searchTerm);
+  setPontos(player: Player, i: number) {
     const control = <FormArray>this.handForm.controls['handForm'];
     let hand = new Hand();
     hand.player = player;
@@ -45,4 +56,10 @@ export class GamePage {
     // this.currentMatch.handsOfMatch.push(hand)
   }
 
+  private initHand(player: Player) {
+    return this._fb.group({
+      pontos: ['0'],
+      estourou: [false],
+    });
+  }
 }
