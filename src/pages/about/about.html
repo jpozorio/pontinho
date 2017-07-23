@@ -9,6 +9,7 @@
 <ion-content padding>
   <form [formGroup]="handForm" *ngIf="game.playersAtGame">
     <div formArrayName="handForm">
+      <span>{{mensagem}}</span>
       <ion-grid>
         <ion-row>
           <ion-col style="size: 25%">
@@ -19,6 +20,9 @@
           </ion-col>
           <ion-col style="size: 30%">
             <ion-label>Estourou</ion-label>
+          </ion-col>
+          <ion-col style="size: 30%">
+            <ion-label>Entrou</ion-label>
           </ion-col>
         </ion-row>
       </ion-grid>
@@ -31,11 +35,16 @@
                   <ion-label>{{player.name}}</ion-label>
                 </ion-col>
                 <ion-col style="size: 10%">
-                  <ion-input type="number" class="form-control" placeholder="Pontos" (ionChange)="setPontos(player, i, $event.value)"
+                  <ion-input type="number" class="form-control" placeholder="Pontos"
+                             (ionChange)="setPontos(player, i, $event.value)"
                              id="pontos_{{i}}"></ion-input>
                 </ion-col>
                 <ion-col style="size: 30%">
-                  <ion-toggle [formGroup]="handForm" id="estourou_{{i}}"></ion-toggle>
+                  <ion-toggle [formGroup]="handForm" id="estourou_{{i}}" (ionChange)="estourou(player, i)"></ion-toggle>
+                </ion-col>
+                <ion-col style="size: 30%">
+                  <ion-toggle disabled="true" [formGroup]="handForm" id="entrou_{{i}}"
+                              (ionChange)="entrou(player, i)"></ion-toggle>
                 </ion-col>
               </ion-row>
             </ion-grid>
@@ -44,4 +53,9 @@
       </div>
     </div>
   </form>
+
+  <div class="margin-20">
+    <button ion-button (click)="finishScoreCad()">Finish</button>
+  </div>
+
 </ion-content>

@@ -52,10 +52,12 @@ export class CadPlayers {
     const control = <FormArray>this.formPlayers.controls['formPlayers'];
     this.game = new Game();
     let controlPlayer: AbstractControl;
+    let idPlayer = 0;
     for (controlPlayer of control.controls) {
       let p: Player = new Player();
       p.name = controlPlayer.get('name').value;
-      p.valuePaid = 0;//TODO: add field to set valuePaid by player
+      p.valuePaid = controlPlayer.get('vlrPago').value;
+      p.id = idPlayer++;
       if (p.name) {
         this.game.addPlayer(p);
       }
