@@ -31,7 +31,7 @@ export class GamePage {
   }
 
   estourou(player: Player, i: number) {
-    this.setPontos(player, i, MAX_POINTS)
+    this.setPontos(player, i, MAX_POINTS);
   }
 
   private getPreviousHand(player: Player) {
@@ -59,17 +59,45 @@ export class GamePage {
     }
     hand.score = parseInt(value);
     player.currentScore = player.currentScore + hand.score;
+
+
+    let element = document.getElementById('entrou_' + i);
+    if (player.currentScore >= MAX_POINTS) {
+      element.setAttribute('disabled', 'false');
+      element.setAttribute('class', 'toggle toggle-md ng-untouched ng-pristine ng-valid');
+    } else {
+      element.setAttribute('disabled', 'true');
+      element.setAttribute('class', 'toggle toggle-md ng-untouched ng-pristine ng-valid toggle-disabled');
+    }
+
   }
 
   finishScoreCad() {
     let qtdeHands = this.currentMatch.handsOfMatch.length;
     let qtdePlayers = this.game.playersAtGame.length;
     if (qtdeHands == qtdePlayers) {
-      this.computeCurrentScoreEachPlayer();
-      this.navCtrl.setRoot(ContactPage, {game: this.game});
+      let winner = this.getWinner();
+      if (winner) {
+        this.mensagem = 'Fim do jogo. ' + winner.name + ' venceu!';
+      } else {
+        this.computeCurrentScoreEachPlayer();
+        this.navCtrl.setRoot(ContactPage, {game: this.game});
+      }
     } else {
       this.mensagem = 'Lance os pontos de todos os jogadores';
     }
+  }
+
+  private getWinner() {
+    let qtdeLeftPlayers = 0;
+    let winner: Player;
+    for (let player of this.game.playersAtGame) {
+      if (player.currentScore < MAX_POINTS) {
+        qtdeLeftPlayers++;
+        winner = player;
+      }
+    }
+    return qtdeLeftPlayers == 1 ? winner : null;
   }
 
   private computeCurrentScoreEachPlayer() {
@@ -91,11 +119,11 @@ export class GamePage {
     return max;
   }
 
-  entrou(player: Player, i: number) {
+  entrou(player: Player, i: number, value) {
     for (let hand of this.currentMatch.handsOfMatch) {
       if (hand.player.id == player.id) {
-        hand.enter = true;
-        player.reentries++
+        hand.enter = value;
+        value == true ? player.reentries++ : player.reentries--
       }
     }
   }

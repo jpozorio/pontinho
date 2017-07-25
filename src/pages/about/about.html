@@ -44,7 +44,7 @@
                 </ion-col>
                 <ion-col style="size: 30%">
                   <ion-toggle disabled="true" [formGroup]="handForm" id="entrou_{{i}}"
-                              (ionChange)="entrou(player, i)"></ion-toggle>
+                              (ionChange)="entrou(player, i, $event.value)"></ion-toggle>
                 </ion-col>
               </ion-row>
             </ion-grid>
