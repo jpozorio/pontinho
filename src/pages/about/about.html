@@ -9,7 +9,15 @@
 <ion-content padding>
   <form [formGroup]="handForm" *ngIf="game.playersAtGame">
     <div formArrayName="handForm">
-      <span>{{mensagem}}</span>
+      <div>{{mensagem}}</div>
+      <span *ngIf="winner">
+        <div>Jogador <b>{{winner.name}}</b> venceu!<br/></div>
+         <div *ngFor="let player of game.playersAtGame; let i=index" class="panel panel-default">
+           <div *ngIf="player.id != winner.id && player.getDueValue() != 0">
+             <b>{{player.name}}</b> tem que <b>{{player.getDueValue() > 0 ? ' pagar ' : ' receber '}}</b> R$ <b>{{player.getDueValue()}}</b>
+           </div>
+         </div>
+      </span>
       <ion-grid>
         <ion-row>
           <ion-col style="size: 25%">

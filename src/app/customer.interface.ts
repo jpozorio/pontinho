@@ -16,6 +16,10 @@ export class Player {
   getEstourado() {
     return this.currentScore >= MAX_POINTS;
   }
+
+  getDueValue(){
+    return (this.reentries + 1 - this.valuePaid);
+  }
 }
 
 export class Match {

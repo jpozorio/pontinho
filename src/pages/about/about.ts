@@ -12,6 +12,7 @@ export class GamePage {
 
   mensagem;
   game: Game;
+  winner: Player;
   currentMatch: Match;
   public handForm: FormGroup;
 
@@ -70,10 +71,8 @@ export class GamePage {
     let qtdeHands = this.currentMatch.handsOfMatch.length;
     let qtdePlayers = this.game.playersAtGame.length;
     if (qtdeHands == qtdePlayers) {
-      let winner = this.getWinner();
-      if (winner) {
-        this.mensagem = this.getMsgCaixa(winner);
-      } else {
+      this.winner = this.getWinner();
+      if (!this.winner) {
         this.computeCurrentScoreEachPlayer();
         this.navCtrl.setRoot(ContactPage, {game: this.game});
       }
@@ -94,15 +93,6 @@ export class GamePage {
     return qtdeLeftPlayers == 1 ? winner : null;
   }
 
-  private getMsgCaixa(winner: Player) {
-    let msg = 'Fim do jogo. ' + winner.name + ' venceu!';
-    for (let player of this.game.playersAtGame) {
-      if (player.id != winner.id) {
-        msg = msg + '\n' + player.name + ' R$ ' + (player.reentries + 1 - player.valuePaid)
-      }
-    }
-    return msg;
-  }
 
   private computeCurrentScoreEachPlayer() {
     let max = this.getMaxPointsOfAllPlayers();
