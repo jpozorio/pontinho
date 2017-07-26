@@ -40,10 +40,10 @@
                              id="pontos_{{i}}"></ion-input>
                 </ion-col>
                 <ion-col style="size: 30%">
-                  <ion-toggle [formGroup]="handForm" id="estourou_{{i}}" (ionChange)="estourou(player, i)"></ion-toggle>
+                  <ion-toggle [formGroup]="handForm" id="estourou_{{i}}" (ionChange)="estourou(player, i, $event.value)"></ion-toggle>
                 </ion-col>
                 <ion-col style="size: 30%">
-                  <ion-toggle disabled="true" [formGroup]="handForm" id="entrou_{{i}}"
+                  <ion-toggle disabled="{{!player.getEstourado()}}" [formGroup]="handForm" id="entrou_{{i}}"
                               (ionChange)="entrou(player, i, $event.value)"></ion-toggle>
                 </ion-col>
               </ion-row>

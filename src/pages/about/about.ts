@@ -30,8 +30,12 @@ export class GamePage {
     );
   }
 
-  estourou(player: Player, i: number) {
-    this.setPontos(player, i, MAX_POINTS);
+  estourou(player: Player, i: number, estourou: boolean) {
+    if (estourou) {
+      this.setPontos(player, i, MAX_POINTS);
+    } else {
+      this.setPontos(player, i, 0);
+    }
   }
 
   private getPreviousHand(player: Player) {
@@ -55,21 +59,11 @@ export class GamePage {
     } else {
       hand = new Hand();
       hand.player = player;
+      player.currentHand = hand;
       this.currentMatch.handsOfMatch.push(hand)
     }
     hand.score = parseInt(value);
     player.currentScore = player.currentScore + hand.score;
-
-
-    let element = document.getElementById('entrou_' + i);
-    if (player.currentScore >= MAX_POINTS) {
-      element.setAttribute('disabled', 'false');
-      element.setAttribute('class', 'toggle toggle-md ng-untouched ng-pristine ng-valid');
-    } else {
-      element.setAttribute('disabled', 'true');
-      element.setAttribute('class', 'toggle toggle-md ng-untouched ng-pristine ng-valid toggle-disabled');
-    }
-
   }
 
   finishScoreCad() {
@@ -78,7 +72,7 @@ export class GamePage {
     if (qtdeHands == qtdePlayers) {
       let winner = this.getWinner();
       if (winner) {
-        this.mensagem = 'Fim do jogo. ' + winner.name + ' venceu!';
+        this.mensagem = this.getMsgCaixa(winner);
       } else {
         this.computeCurrentScoreEachPlayer();
         this.navCtrl.setRoot(ContactPage, {game: this.game});
@@ -98,6 +92,16 @@ export class GamePage {
       }
     }
     return qtdeLeftPlayers == 1 ? winner : null;
+  }
+
+  private getMsgCaixa(winner: Player) {
+    let msg = 'Fim do jogo. ' + winner.name + ' venceu!';
+    for (let player of this.game.playersAtGame) {
+      if (player.id != winner.id) {
+        msg = msg + '\n' + player.name + ' R$ ' + (player.reentries + 1 - player.valuePaid)
+      }
+    }
+    return msg;
   }
 
   private computeCurrentScoreEachPlayer() {

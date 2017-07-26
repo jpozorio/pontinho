@@ -6,10 +6,15 @@ export class Player {
   currentScore: number;
   reentries: number;
   id: number;
+  currentHand: Hand;
 
   constructor() {
     this.currentScore = 0;
     this.reentries = 0;
+  }
+
+  getEstourado() {
+    return this.currentScore >= MAX_POINTS;
   }
 }
 
