@@ -13,7 +13,7 @@ export class Player {
     this.reentries = 0;
   }
 
-  getEstourado() {
+  getBoomed() {
     return this.currentScore >= MAX_POINTS;
   }
 

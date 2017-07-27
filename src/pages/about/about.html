@@ -38,23 +38,25 @@
         <div class="panel-heading">
           <div [formGroup]="handForm" *ngIf="player">
             <ion-grid>
-              <ion-row>
-                <ion-col style="size: 25%">
-                  <ion-label>{{player.name}}</ion-label>
-                </ion-col>
-                <ion-col style="size: 10%">
-                  <ion-input type="number" class="form-control" placeholder="Pontos"
-                             (ionChange)="setPontos(player, i, $event.value)"
-                             id="pontos_{{i}}"></ion-input>
-                </ion-col>
-                <ion-col style="size: 30%">
-                  <ion-toggle [formGroup]="handForm" id="estourou_{{i}}" (ionChange)="estourou(player, i, $event.value)"></ion-toggle>
-                </ion-col>
-                <ion-col style="size: 30%">
-                  <ion-toggle disabled="{{!player.getEstourado()}}" [formGroup]="handForm" id="entrou_{{i}}"
-                              (ionChange)="entrou(player, i, $event.value)"></ion-toggle>
-                </ion-col>
-              </ion-row>
+              <div class="{{(player.getBoomed()) ? 'playerOut' : ''}}">
+                <ion-row>
+                  <ion-col style="size: 25%">
+                    <ion-label>{{player.name}}</ion-label>
+                  </ion-col>
+                  <ion-col style="size: 10%">
+                    <ion-input type="number" class="form-control" placeholder="Pontos" value="{{player.currentHand?.score}}"
+                               (ionChange)="setPontos(player, i, $event.value)"
+                               id="pontos_{{i}}"></ion-input>
+                  </ion-col>
+                  <ion-col style="size: 30%">
+                    <ion-toggle [formGroup]="handForm" id="estourou_{{i}}" (ionChange)="boom(player, i, $event.value)"></ion-toggle>
+                  </ion-col>
+                  <ion-col style="size: 30%">
+                    <ion-toggle disabled="{{!player.getBoomed()}}" [formGroup]="handForm" id="entrou_{{i}}" checked="{{player.getBoomed() && player.currentHand?.enter}}"
+                                (ionChange)="entrou(player, i, $event.value)"></ion-toggle>
+                  </ion-col>
+                </ion-row>
+              </div>
             </ion-grid>
           </div>
         </div>

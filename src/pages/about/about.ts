@@ -31,11 +31,12 @@ export class GamePage {
     );
   }
 
-  estourou(player: Player, i: number, estourou: boolean) {
+  boom(player: Player, i: number, estourou: boolean) {
     if (estourou) {
       this.setPontos(player, i, MAX_POINTS);
     } else {
       this.setPontos(player, i, 0);
+      player.currentHand.enter = false;
     }
   }
 
@@ -63,7 +64,7 @@ export class GamePage {
       player.currentHand = hand;
       this.currentMatch.handsOfMatch.push(hand)
     }
-    hand.score = parseInt(value);
+    hand.score = value ? parseInt(value) : 0;
     player.currentScore = player.currentScore + hand.score;
   }
 
@@ -98,7 +99,10 @@ export class GamePage {
     let max = this.getMaxPointsOfAllPlayers();
     for (let player of this.game.playersAtGame) {
       if (player.currentScore >= MAX_POINTS) {
-        player.currentScore = max;
+        if (player.currentHand.enter) {
+          player.currentScore = max;
+          player.currentHand = null;
+        }
       }
     }
   }
