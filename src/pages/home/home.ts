@@ -1,5 +1,5 @@
 import {Component} from "@angular/core";
-import {NavController} from "ionic-angular";
+import {NavController, NavParams} from "ionic-angular";
 import {Game, Player} from "../../app/customer.interface";
 import {AbstractControl, FormArray, FormBuilder, FormGroup, Validators} from "@angular/forms";
 import {GamePage} from "../about/about";
@@ -13,8 +13,18 @@ export class CadPlayers {
   public formPlayers: FormGroup;
   game: Game;
 
-  constructor(public navCtrl: NavController, private _fb: FormBuilder) {
-
+  constructor(public navCtrl: NavController, private _fb: FormBuilder, public navParams: NavParams) {
+    this.game = new Game();
+    let oldGame = navParams.get('game_1');
+    if (oldGame) {
+      for (let oldPlayer of oldGame.allPlayers) {
+        let newPlayer = new Player();
+        newPlayer.name = oldPlayer.name;
+        newPlayer.id = oldPlayer.id;
+        newPlayer.valuePaid = 0;
+        this.game.addPlayer(newPlayer)
+      }
+    }
   }
 
   ngOnInit() {
@@ -25,11 +35,17 @@ export class CadPlayers {
         formPlayers: this._fb.array([])
       }
     );
+    if (this.game.allPlayers.length > 0) {
+      for (let player of this.game.allPlayers) {
+        this.addPlayer(player);
+      }
+    } else {
+      this.newPlayer();
+      this.newPlayer();
+      this.newPlayer();
+      this.newPlayer();
+    }
 
-    this.addPlayer();
-    this.addPlayer();
-    this.addPlayer();
-    this.addPlayer();
   }
 
   initPlayer() {
@@ -39,7 +55,20 @@ export class CadPlayers {
     });
   }
 
-  addPlayer() {
+  initExistentPlayer(player: Player) {
+    return this._fb.group({
+      name: [player.name, Validators.required],
+      vlrPago: [player.valuePaid, [Validators.required]],
+    });
+  }
+
+  addPlayer(player: Player) {
+    const control = <FormArray>this.formPlayers.controls['formPlayers'];
+    const addrCtrl = this.initExistentPlayer(player);
+    control.push(addrCtrl);
+  }
+
+  newPlayer() {
     const control = <FormArray>this.formPlayers.controls['formPlayers'];
     const addrCtrl = this.initPlayer();
     control.push(addrCtrl);

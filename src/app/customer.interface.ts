@@ -42,14 +42,17 @@ export class Hand {
 
 export class Game {
   playersAtGame: Player[];
+  allPlayers: Player[];
   matches: Match[];
 
   constructor() {
     this.playersAtGame = [];
+    this.allPlayers = [];
     this.matches = [];
   }
 
   addPlayer(player: Player) {
     this.playersAtGame.push(player);
+    this.allPlayers.push(player);
   }
 }

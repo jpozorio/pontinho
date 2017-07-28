@@ -12,7 +12,8 @@
       <div>{{mensagem}}</div>
       <span *ngIf="winner">
         <div>Jogador <b>{{winner.name}}</b> venceu!<br/></div>
-         <div *ngFor="let player of game.playersAtGame; let i=index" class="panel panel-default">
+        <div>Ele <b>{{winner.getDueValue() < 0 ? 'tem '+ winner.getDueValue() +' em haver no caixa ' : 'devia '+ winner.getDueValue() +' para o caixa ' }}</b> e deve receber os seguintes valores dos outros jogadores:</div>
+         <div *ngFor="let player of game.allPlayers; let i=index" class="panel panel-default">
            <div *ngIf="player.id != winner.id && player.getDueValue() != 0">
              <b>{{player.name}}</b> tem que <b>{{player.getDueValue() > 0 ? ' pagar ' : ' receber '}}</b> R$ <b>{{player.getDueValue()}}</b>
            </div>
@@ -66,6 +67,9 @@
 
   <div class="margin-20">
     <button ion-button (click)="finishScoreCad()">Finish</button>
+    <span *ngIf="winner">
+      <button ion-button (click)="newGame()">Novo jogo</button>
+    </span>
   </div>
 
 </ion-content>

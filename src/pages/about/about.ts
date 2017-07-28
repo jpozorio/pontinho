@@ -3,6 +3,7 @@ import {NavController, NavParams} from "ionic-angular";
 import {Game, Hand, Match, MAX_POINTS, Player} from "../../app/customer.interface";
 import {FormBuilder, FormGroup} from "@angular/forms";
 import {ContactPage} from "../contact/contact";
+import {CadPlayers} from "../home/home";
 
 @Component({
   selector: 'page-about',
@@ -103,5 +104,9 @@ export class GamePage {
         value == true ? player.reentries++ : player.reentries--
       }
     }
+  }
+
+  newGame() {
+    this.navCtrl.setRoot(CadPlayers, {game_1: this.game});
   }
 }
