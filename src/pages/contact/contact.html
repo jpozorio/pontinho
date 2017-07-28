@@ -23,8 +23,8 @@
       </ion-col>
     </ion-row>
   </ion-grid>
-  <div *ngFor="let player of game.playersAtGame; let i=index" class="panel panel-default">
-    <div class="panel-heading">
+  <div *ngFor="let player of game.playersAtGame;" class="panel panel-default">
+    <div class="panel-heading" *ngIf="player">
       <ion-grid>
         <ion-row>
           <ion-col style="size: 25%">
@@ -34,7 +34,7 @@
             <ion-label>{{player.currentScore}}</ion-label>
           </ion-col>
           <ion-col style="size: 30%">
-            <ion-label>{{99 - player.currentScore}}</ion-label>
+            <ion-label>{{player.getPointsToEscape()}}</ion-label>
           </ion-col>
           <ion-col style="size: 30%">
             <ion-label>{{player.reentries}}</ion-label>

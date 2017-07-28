@@ -27,6 +27,9 @@ export class CadPlayers {
     );
 
     this.addPlayer();
+    this.addPlayer();
+    this.addPlayer();
+    this.addPlayer();
   }
 
   initPlayer() {

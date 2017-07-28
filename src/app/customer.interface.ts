@@ -17,8 +17,12 @@ export class Player {
     return this.currentScore >= MAX_POINTS;
   }
 
-  getDueValue(){
+  getDueValue() {
     return (this.reentries + 1 - this.valuePaid);
+  }
+
+  getPointsToEscape() {
+    return (99 - this.currentScore)
   }
 }
 

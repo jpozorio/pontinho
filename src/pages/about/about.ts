@@ -21,6 +21,9 @@ export class GamePage {
     this.currentMatch = new Match();
     this.currentMatch.handsOfMatch = [];
     this.game.matches.push(this.currentMatch);
+    for (let player of this.game.playersAtGame) {
+      player.currentHand = null;
+    }
   }
 
   ngOnInit() {
@@ -74,8 +77,7 @@ export class GamePage {
     if (qtdeHands == qtdePlayers) {
       this.winner = this.getWinner();
       if (!this.winner) {
-        this.computeCurrentScoreEachPlayer();
-        this.navCtrl.setRoot(ContactPage, {game: this.game});
+        this.navCtrl.setRoot(ContactPage, {game_1: this.game});
       }
     } else {
       this.mensagem = 'Lance os pontos de todos os jogadores';
@@ -92,29 +94,6 @@ export class GamePage {
       }
     }
     return qtdeLeftPlayers == 1 ? winner : null;
-  }
-
-
-  private computeCurrentScoreEachPlayer() {
-    let max = this.getMaxPointsOfAllPlayers();
-    for (let player of this.game.playersAtGame) {
-      if (player.currentScore >= MAX_POINTS) {
-        if (player.currentHand.enter) {
-          player.currentScore = max;
-          player.currentHand = null;
-        }
-      }
-    }
-  }
-
-  private getMaxPointsOfAllPlayers() {
-    let max = -1;
-    for (let player of this.game.playersAtGame) {
-      if (player.currentScore > max && player.currentScore < MAX_POINTS) {
-        max = player.currentScore;
-      }
-    }
-    return max;
   }
 
   entrou(player: Player, i: number, value) {

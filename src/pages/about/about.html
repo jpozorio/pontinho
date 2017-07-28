@@ -38,7 +38,7 @@
         <div class="panel-heading">
           <div [formGroup]="handForm" *ngIf="player">
             <ion-grid>
-              <div class="{{(player.getBoomed()) ? 'playerOut' : ''}}">
+              <div>
                 <ion-row>
                   <ion-col style="size: 25%">
                     <ion-label>{{player.name}}</ion-label>
@@ -52,7 +52,7 @@
                     <ion-toggle [formGroup]="handForm" id="estourou_{{i}}" (ionChange)="boom(player, i, $event.value)"></ion-toggle>
                   </ion-col>
                   <ion-col style="size: 30%">
-                    <ion-toggle disabled="{{!player.getBoomed()}}" [formGroup]="handForm" id="entrou_{{i}}" checked="{{player.getBoomed() && player.currentHand?.enter}}"
+                    <ion-toggle disabled="{{!player.getBoomed()}}" [formGroup]="handForm" id="entrou_{{i}}" checked="{{ player.currentHand?.enter == true}}"
                                 (ionChange)="entrou(player, i, $event.value)"></ion-toggle>
                   </ion-col>
                 </ion-row>
