@@ -109,4 +109,8 @@ export class GamePage {
   newGame() {
     this.navCtrl.setRoot(CadPlayers, {game_1: this.game});
   }
+
+  setValuePaidCurrentHand(player: Player, i: number, value) {
+    player.currentHand.valuePaid = value;
+  }
 }

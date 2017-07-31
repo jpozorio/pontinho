@@ -28,6 +28,7 @@ export class ContactPage {
       if (player.currentScore >= MAX_POINTS) {
         if (player.currentHand.enter) {
           player.currentScore = max;
+          player.valuePaid += player.currentHand.valuePaid;
         } else {
           this.game.playersAtGame.splice(idx, 1);
         }

@@ -34,9 +34,11 @@ export class Hand {
   player: Player;
   score: number;
   enter: boolean;
+  valuePaid: number;
 
   constructor() {
     this.enter = false;
+    this.valuePaid = 0;
   }
 }
 
