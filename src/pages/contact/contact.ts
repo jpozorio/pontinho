@@ -1,7 +1,7 @@
 import {Component} from '@angular/core';
 import {NavController, NavParams} from 'ionic-angular';
 import {GamePage} from "../about/about";
-import {Game, MAX_POINTS} from "../../app/customer.interface";
+import {Game} from "../../app/customer.interface";
 
 @Component({
   selector: 'page-contact',
@@ -25,7 +25,7 @@ export class ContactPage {
     let max = this.getMaxPointsOfAllPlayers();
     for (let idx = this.game.playersAtGame.length - 1; idx >= 0; idx--) {
       let player = this.game.playersAtGame[idx];
-      if (player.currentScore >= MAX_POINTS) {
+      if (player.getBoomed()) {
         if (player.currentHand.enter) {
           player.currentScore = max;
           player.valuePaid += player.currentHand.valuePaid;

@@ -2,8 +2,8 @@ import {Component} from "@angular/core";
 import {NavController, NavParams} from "ionic-angular";
 import {Game, Hand, Match, MAX_POINTS, Player} from "../../app/customer.interface";
 import {FormBuilder, FormGroup} from "@angular/forms";
-import {ContactPage} from "../contact/contact";
 import {CadPlayers} from "../home/home";
+import {EntradaPage} from "../entradas/entrada";
 
 @Component({
   selector: 'page-about',
@@ -40,7 +40,6 @@ export class GamePage {
       this.setPontos(player, i, MAX_POINTS);
     } else {
       this.setPontos(player, i, 0);
-      player.currentHand.enter = false;
     }
   }
 
@@ -78,7 +77,7 @@ export class GamePage {
     if (qtdeHands == qtdePlayers) {
       this.winner = this.getWinner();
       if (!this.winner) {
-        this.navCtrl.setRoot(ContactPage, {game_1: this.game});
+        this.navCtrl.setRoot(EntradaPage, {game_1: this.game, currentMatch: this.currentMatch});
       }
     } else {
       this.mensagem = 'Lance os pontos de todos os jogadores';
@@ -97,20 +96,8 @@ export class GamePage {
     return qtdeLeftPlayers == 1 ? winner : null;
   }
 
-  entrou(player: Player, i: number, value) {
-    for (let hand of this.currentMatch.handsOfMatch) {
-      if (hand.player.id == player.id) {
-        hand.enter = value;
-        value == true ? player.reentries++ : player.reentries--
-      }
-    }
-  }
-
   newGame() {
     this.navCtrl.setRoot(CadPlayers, {game_1: this.game});
   }
 
-  setValuePaidCurrentHand(player: Player, i: number, value) {
-    player.currentHand.valuePaid = value;
-  }
 }

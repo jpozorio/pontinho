@@ -12,12 +12,14 @@ import {StatusBar} from "@ionic-native/status-bar";
 import {SplashScreen} from "@ionic-native/splash-screen";
 import {PlayerComponent} from "./player.component";
 import {HandComponent} from "./hand.component";
+import {EntradaPage} from "../pages/entradas/entrada";
 
 @NgModule({
   declarations: [
     MyApp,
     GamePage,
     ContactPage,
+    EntradaPage,
     CadPlayers,
     TabsPage,
     PlayerComponent,
@@ -32,6 +34,7 @@ import {HandComponent} from "./hand.component";
     MyApp,
     GamePage,
     ContactPage,
+    EntradaPage,
     CadPlayers,
     TabsPage
   ],
