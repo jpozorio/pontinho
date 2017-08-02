@@ -2,6 +2,7 @@ import {Component} from '@angular/core';
 import {NavController, NavParams} from 'ionic-angular';
 import {GamePage} from "../about/about";
 import {Game} from "../../app/customer.interface";
+import {HandHistoryPage} from "../handHistory/handHistory";
 
 @Component({
   selector: 'page-contact',
@@ -44,5 +45,9 @@ export class ContactPage {
       }
     }
     return max;
+  }
+
+  viewHandHistory() {
+    this.navCtrl.push(HandHistoryPage, {game: this.game});
   }
 }

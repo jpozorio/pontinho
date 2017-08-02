@@ -13,6 +13,7 @@ import {SplashScreen} from "@ionic-native/splash-screen";
 import {PlayerComponent} from "./player.component";
 import {HandComponent} from "./hand.component";
 import {EntradaPage} from "../pages/entradas/entrada";
+import {HandHistoryPage} from "../pages/handHistory/handHistory";
 
 @NgModule({
   declarations: [
@@ -20,6 +21,7 @@ import {EntradaPage} from "../pages/entradas/entrada";
     GamePage,
     ContactPage,
     EntradaPage,
+    HandHistoryPage,
     CadPlayers,
     TabsPage,
     PlayerComponent,
@@ -34,6 +36,7 @@ import {EntradaPage} from "../pages/entradas/entrada";
     MyApp,
     GamePage,
     ContactPage,
+    HandHistoryPage,
     EntradaPage,
     CadPlayers,
     TabsPage
