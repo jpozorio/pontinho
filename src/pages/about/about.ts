@@ -4,6 +4,7 @@ import {Game, Hand, Match, MAX_POINTS, Player} from "../../app/customer.interfac
 import {FormBuilder, FormGroup} from "@angular/forms";
 import {CadPlayers} from "../home/home";
 import {EntradaPage} from "../entradas/entrada";
+import {ContactPage} from "../contact/contact";
 
 @Component({
   selector: 'page-about',
@@ -77,11 +78,25 @@ export class GamePage {
     if (qtdeHands == qtdePlayers) {
       this.winner = this.getWinner();
       if (!this.winner) {
-        this.navCtrl.setRoot(EntradaPage, {game_1: this.game, currentMatch: this.currentMatch});
+        let somePlayerBoom = this.someoneGetsBoomed();
+        if (somePlayerBoom) {
+          this.navCtrl.setRoot(EntradaPage, {game_1: this.game, currentMatch: this.currentMatch});
+        } else {
+          this.navCtrl.setRoot(ContactPage, {game_1: this.game});
+        }
       }
     } else {
       this.mensagem = 'Lance os pontos de todos os jogadores';
     }
+  }
+
+  private someoneGetsBoomed() {
+    for (let player of this.game.playersAtGame) {
+      if (player.currentScore >= MAX_POINTS) {
+        return true;
+      }
+    }
+    return false;
   }
 
   private getWinner() {
