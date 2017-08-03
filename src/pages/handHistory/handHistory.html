@@ -13,11 +13,9 @@
         <ion-col *ngFor="let player of game.allPlayers; let i=index"> {{player.name}}</ion-col>
       </ion-row>
       <ion-row style="border-left: solid; border-bottom: solid; border-right: solid; border-color: #488aff" *ngFor="let rodada of game.matches; let idxRodada=index">
-        <span *ngFor="let player of game.allPlayers; let idxPlayer=index">
-          <span *ngFor="let hand of rodada.handsOfMatch; let idxHand=index">
-            <ion-col *ngIf="hand.player.id == player.id"> {{hand.score}}</ion-col>
-          </span>
-        </span>
+        <ion-col *ngFor="let player of game.allPlayers; let idxPlayer=index">
+          {{rodada.getScoreOfPlayer(player)}}
+        </ion-col>
       </ion-row>
     </ion-grid>
   </div>

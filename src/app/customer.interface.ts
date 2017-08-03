@@ -28,6 +28,15 @@ export class Player {
 
 export class Match {
   handsOfMatch: Hand[];
+
+  getScoreOfPlayer(player: Player) {
+    for (let hand of this.handsOfMatch) {
+      if (hand.player.id == player.id) {
+        return hand.score;
+      }
+    }
+    return -1;
+  }
 }
 
 export class Hand {
