@@ -35,7 +35,7 @@ export class Match {
         return hand.score;
       }
     }
-    return -1;
+    return '-';
   }
 }
 
