@@ -11,14 +11,16 @@
     <form [formGroup]="handForm" *ngIf="game.playersAtGame">
       <div formArrayName="handForm">
         <div>{{mensagem}}</div>
+        <ion-label *ngIf="scrumblerName">O baralho é do jogador: <b>{{scrumblerName}}</b></ion-label>
         <span *ngIf="winner">
-        <div>Jogador <b>{{winner.name}}</b> venceu!<br/></div>
-        <div>Ele <b>{{winner.getDueValue() < 0 ? 'tem '+ winner.getDueValue() +' em haver no caixa ' : 'devia '+ winner.getDueValue() +' para o caixa ' }}</b> e deve receber os seguintes valores dos outros jogadores:</div>
-         <div *ngFor="let player of game.allPlayers; let i=index" class="panel panel-default">
-           <div *ngIf="player.id != winner.id">
-             <b>{{player.name}}</b> pagou <b>{{player.valuePaid}}</b> e reentrou <b>{{player.reentries}}</b> vezes, portanto tem que <b>{{player.getDueValue() >= 0 ? ' pagar ' : ' receber '}}</b> R$ <b>{{player.getDueValue()}}</b>
+          <div>Jogador <b>{{winner.name}}</b> venceu!<br/></div>
+          <div>Ele <b>{{winner.getDueValue() < 0 ? 'tem '+ winner.getDueValue() +' em haver no caixa ' : 'devia '+ winner.getDueValue() +' para o caixa ' }}</b> e deve receber os seguintes valores dos outros jogadores:</div>
+           <div *ngFor="let player of game.allPlayers; let i=index" class="panel panel-default">
+             <div *ngIf="player.id != winner.id">
+               <b>{{player.name}}</b> pagou <b>{{player.valuePaid}}</b> e reentrou <b>{{player.reentries}}</b> vezes, portanto tem que <b>{{player.getDueValue() >= 0 ? ' pagar ' : ' receber '}}</b> R$ <b>{{player.getDueValue()}}</b>
+               <br/>
+             </div>
            </div>
-         </div>
       </span>
         <ion-grid>
           <ion-row class="gridHeader">
@@ -26,10 +28,10 @@
               <ion-label class="negrito">Jogador</ion-label>
             </ion-col>
             <ion-col style="size: 10%">
-              <ion-label  class="negrito">Pontos</ion-label>
+              <ion-label class="negrito">Pontos</ion-label>
             </ion-col>
             <ion-col style="size: 20%">
-              <ion-label  class="negrito">Estourou</ion-label>
+              <ion-label class="negrito">Estourou</ion-label>
             </ion-col>
           </ion-row>
         </ion-grid>

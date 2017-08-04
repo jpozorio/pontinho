@@ -13,6 +13,7 @@ import {ContactPage} from "../contact/contact";
 export class GamePage {
 
   mensagem;
+  scrumblerName;
   game: Game;
   winner: Player;
   currentMatch: Match;
@@ -23,7 +24,7 @@ export class GamePage {
     this.currentMatch = new Match();
     this.currentMatch.handsOfMatch = [];
     this.game.matches.push(this.currentMatch);
-    // this.game.nextScrumbler();
+    this.scrumblerName = this.game.nextScrumbler();
     for (let player of this.game.playersAtGame) {
       player.currentHand = null;
     }

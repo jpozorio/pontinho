@@ -55,15 +55,32 @@ export class Game {
   playersAtGame: Player[];
   allPlayers: Player[];
   matches: Match[];
+  private scrumbler: number;
 
   constructor() {
     this.playersAtGame = [];
     this.allPlayers = [];
     this.matches = [];
+    this.scrumbler = -1;
   }
 
   addPlayer(player: Player) {
     this.playersAtGame.push(player);
     this.allPlayers.push(player);
+  }
+
+  nextScrumbler() {
+    return this.allPlayers[this.discoverScrumbler(this.scrumbler)].name;
+  }
+
+  private discoverScrumbler(currentScrumbler: number) {
+    currentScrumbler = ((currentScrumbler + 1) % (this.allPlayers.length));
+    for (let player of this.allPlayers) {
+      if (player.id == currentScrumbler && !player.getBoomed()) {
+        this.scrumbler = currentScrumbler;
+        return this.scrumbler;
+      }
+    }
+    return this.discoverScrumbler(currentScrumbler);
   }
 }
