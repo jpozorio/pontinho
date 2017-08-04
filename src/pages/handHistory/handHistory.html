@@ -1,5 +1,5 @@
-<ion-header>
-  <ion-navbar>
+<ion-header >
+  <ion-navbar color="primary"  >
     <ion-title>
       Histórico de mãos
     </ion-title>
@@ -9,11 +9,11 @@
 <ion-content>
   <div *ngIf="game.matches">
     <ion-grid>
-      <ion-row style="border-left: solid; border-bottom: solid; border-top: solid; border-right: solid; border-color: #488aff">
-        <ion-col *ngFor="let player of game.allPlayers; let i=index"> {{player.name}}</ion-col>
+      <ion-row  class="gridHeader">
+        <ion-col class="linha" *ngFor="let player of game.allPlayers; let i=index"> <ion-label class="negrito">{{player.name}}</ion-label></ion-col>
       </ion-row>
-      <ion-row style="border-left: solid; border-bottom: solid; border-right: solid; border-color: #488aff" *ngFor="let rodada of game.matches; let idxRodada=index">
-        <ion-col *ngFor="let player of game.allPlayers; let idxPlayer=index">
+      <ion-row *ngFor="let rodada of game.matches; let idxRodada=index">
+        <ion-col class="linha" *ngFor="let player of game.allPlayers; let idxPlayer=index">
           {{rodada.getScoreOfPlayer(player)}}
         </ion-col>
       </ion-row>

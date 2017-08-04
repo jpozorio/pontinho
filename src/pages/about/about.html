@@ -1,5 +1,5 @@
 <ion-header>
-  <ion-navbar>
+  <ion-navbar color="primary">
     <ion-title>
       Pontos
     </ion-title>
@@ -7,10 +7,11 @@
 </ion-header>
 
 <ion-content padding>
-  <form [formGroup]="handForm" *ngIf="game.playersAtGame">
-    <div formArrayName="handForm">
-      <div>{{mensagem}}</div>
-      <span *ngIf="winner">
+  <div class="container">
+    <form [formGroup]="handForm" *ngIf="game.playersAtGame">
+      <div formArrayName="handForm">
+        <div>{{mensagem}}</div>
+        <span *ngIf="winner">
         <div>Jogador <b>{{winner.name}}</b> venceu!<br/></div>
         <div>Ele <b>{{winner.getDueValue() < 0 ? 'tem '+ winner.getDueValue() +' em haver no caixa ' : 'devia '+ winner.getDueValue() +' para o caixa ' }}</b> e deve receber os seguintes valores dos outros jogadores:</div>
          <div *ngFor="let player of game.allPlayers; let i=index" class="panel panel-default">
@@ -19,50 +20,52 @@
            </div>
          </div>
       </span>
-      <ion-grid>
-        <ion-row>
-          <ion-col style="size: 20%">
-            <ion-label>Jogador</ion-label>
-          </ion-col>
-          <ion-col style="size: 10%">
-            <ion-label>Pontos</ion-label>
-          </ion-col>
-          <ion-col style="size: 20%">
-            <ion-label>Estourou</ion-label>
-          </ion-col>
-        </ion-row>
-      </ion-grid>
-      <div *ngFor="let player of game.playersAtGame; let i=index" class="panel panel-default">
-        <div class="panel-heading">
-          <div [formGroup]="handForm" *ngIf="player">
-            <ion-grid>
-              <div>
-                <ion-row>
-                  <ion-col style="size: 20%">
-                    <ion-label>{{player.name}}</ion-label>
-                  </ion-col>
-                  <ion-col style="size: 10%">
-                    <ion-input type="number" class="form-control" placeholder="pontos" value="{{player.currentHand?.score}}"
-                               (ionChange)="setPontos(player, i, $event.value)"
-                               id="pontos_{{i}}"></ion-input>
-                  </ion-col>
-                  <ion-col style="size: 20%">
-                    <ion-toggle [formGroup]="handForm" id="estourou_{{i}}" (ionChange)="boom(player, i, $event.value)"></ion-toggle>
-                  </ion-col>
-                </ion-row>
-              </div>
-            </ion-grid>
+        <ion-grid>
+          <ion-row class="gridHeader">
+            <ion-col style="size: 20%">
+              <ion-label class="negrito">Jogador</ion-label>
+            </ion-col>
+            <ion-col style="size: 10%">
+              <ion-label  class="negrito">Pontos</ion-label>
+            </ion-col>
+            <ion-col style="size: 20%">
+              <ion-label  class="negrito">Estourou</ion-label>
+            </ion-col>
+          </ion-row>
+        </ion-grid>
+        <div *ngFor="let player of game.playersAtGame; let i=index" class="panel panel-default">
+          <div class="panel-heading">
+            <div [formGroup]="handForm" *ngIf="player">
+              <ion-grid>
+                <div>
+                  <ion-row class="linha">
+                    <ion-col style="size: 20%">
+                      <ion-label class="negrito">{{player.name}}</ion-label>
+                    </ion-col>
+                    <ion-col style="size: 10%">
+                      <ion-input type="number" class="form-control" placeholder="pontos"
+                                 value="{{player.currentHand?.score}}"
+                                 (ionChange)="setPontos(player, i, $event.value)"
+                                 id="pontos_{{i}}"></ion-input>
+                    </ion-col>
+                    <ion-col style="size: 20%">
+                      <ion-toggle [formGroup]="handForm" id="estourou_{{i}}"
+                                  (ionChange)="boom(player, i, $event.value)"></ion-toggle>
+                    </ion-col>
+                  </ion-row>
+                </div>
+              </ion-grid>
+            </div>
           </div>
         </div>
       </div>
-    </div>
-  </form>
+    </form>
 
-  <div class="margin-20">
-    <button ion-button (click)="finishScoreCad()">Finish</button>
-    <span *ngIf="winner">
+    <div class="margin-20">
+      <button ion-button (click)="finishScoreCad()">Finish</button>
+      <span *ngIf="winner">
       <button ion-button (click)="newGame()">Novo jogo</button>
     </span>
+    </div>
   </div>
-
 </ion-content>

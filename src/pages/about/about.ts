@@ -23,6 +23,7 @@ export class GamePage {
     this.currentMatch = new Match();
     this.currentMatch.handsOfMatch = [];
     this.game.matches.push(this.currentMatch);
+    // this.game.nextScrumbler();
     for (let player of this.game.playersAtGame) {
       player.currentHand = null;
     }

@@ -1,5 +1,5 @@
 <ion-header>
-  <ion-navbar>
+  <ion-navbar color="primary">
     <ion-title>
       Lance as entradas
     </ion-title>
@@ -7,49 +7,53 @@
 </ion-header>
 
 <ion-content padding>
-  <form [formGroup]="reentriesForm" *ngIf="game.playersAtGame">
-    <div formArrayName="reentriesForm">
-      <ion-grid>
-        <ion-row>
-          <ion-col style="size: 20%">
-            <ion-label>Jogador</ion-label>
-          </ion-col>
-          <ion-col style="size: 20%">
-            <ion-label>Entrou</ion-label>
-          </ion-col>
-          <ion-col style="size: 10%">
-            <ion-label>Pagou</ion-label>
-          </ion-col>
-        </ion-row>
-      </ion-grid>
-      <div *ngFor="let player of game.playersAtGame; let i=index" class="panel panel-default">
-        <div class="panel-heading">
-          <div [formGroup]="reentriesForm" *ngIf="player && player.getBoomed()">
-            <ion-grid>
-              <div>
-                <ion-row>
-                  <ion-col style="size: 20%">
-                    <ion-label>{{player.name}}</ion-label>
-                  </ion-col>
-                  <ion-col style="size: 20%">
-                    <ion-toggle [formGroup]="reentriesForm" id="entrou_{{i}}" checked="{{ player.currentHand?.enter == true}}"
-                                (ionChange)="entrou(player, i, $event.value)"></ion-toggle>
-                  </ion-col>
-                  <ion-col style="size: 10%">
-                    <ion-input disabled="{{!player.currentHand?.enter}}" [formGroup]="reentriesForm" type="number" class="form-control" placeholder="pago" value="{{player.currentHand?.valuePaid}}"
-                               (ionChange)="setValuePaidCurrentHand(player, i, $event.value)" id="valorpago_{{i}}"></ion-input>
-                  </ion-col>
-                </ion-row>
-              </div>
-            </ion-grid>
+  <div class="container">
+    <form [formGroup]="reentriesForm" *ngIf="game.playersAtGame">
+      <div formArrayName="reentriesForm">
+        <ion-grid>
+          <ion-row class="gridHeader">
+            <ion-col style="size: 20%">
+              <ion-label class="negrito">Jogador</ion-label>
+            </ion-col>
+            <ion-col style="size: 20%">
+              <ion-label class="negrito">Entrou</ion-label>
+            </ion-col>
+            <ion-col style="size: 10%">
+              <ion-label class="negrito">Pagou</ion-label>
+            </ion-col>
+          </ion-row>
+        </ion-grid>
+        <div *ngFor="let player of game.playersAtGame; let i=index" class="panel panel-default">
+          <div class="panel-heading">
+            <div [formGroup]="reentriesForm" *ngIf="player && player.getBoomed()">
+              <ion-grid>
+                <div>
+                  <ion-row>
+                    <ion-col style="size: 20%">
+                      <ion-label class="negrito">{{player.name}}</ion-label>
+                    </ion-col>
+                    <ion-col style="size: 20%">
+                      <ion-toggle [formGroup]="reentriesForm" id="entrou_{{i}}"
+                                  checked="{{ player.currentHand?.enter == true}}"
+                                  (ionChange)="entrou(player, i, $event.value)"></ion-toggle>
+                    </ion-col>
+                    <ion-col style="size: 10%">
+                      <ion-input disabled="{{!player.currentHand?.enter}}" [formGroup]="reentriesForm" type="number"
+                                 class="form-control" placeholder="pago" value="{{player.currentHand?.valuePaid}}"
+                                 (ionChange)="setValuePaidCurrentHand(player, i, $event.value)"
+                                 id="valorpago_{{i}}"></ion-input>
+                    </ion-col>
+                  </ion-row>
+                </div>
+              </ion-grid>
+            </div>
           </div>
         </div>
       </div>
+    </form>
+
+    <div class="margin-20">
+      <button ion-button (click)="finishReentriesCad()">Finish</button>
     </div>
-  </form>
-
-  <div class="margin-20">
-    <button ion-button (click)="finishReentriesCad()">Finish</button>
   </div>
-
 </ion-content>
