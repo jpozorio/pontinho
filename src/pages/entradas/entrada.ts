@@ -38,7 +38,7 @@ export class EntradaPage {
   }
 
   setValuePaidCurrentHand(player: Player, i: number, value) {
-    player.currentHand.valuePaid = value;
+    player.currentHand.valuePaid = value ? parseInt(value) : 0;
   }
 
   finishReentriesCad() {
