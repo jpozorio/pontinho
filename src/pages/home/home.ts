@@ -88,7 +88,7 @@ export class CadPlayers {
     for (controlPlayer of control.controls) {
       let p: Player = new Player();
       p.name = controlPlayer.get('name').value;
-      p.valuePaid = controlPlayer.get('vlrPago').value;
+      p.valuePaid = parseInt(controlPlayer.get('vlrPago').value);
       p.id = idPlayer++;
       if (p.name) {
         this.game.addPlayer(p);

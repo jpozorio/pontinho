@@ -11,9 +11,11 @@ import {HandHistoryPage} from "../handHistory/handHistory";
 export class ContactPage {
 
   game: Game;
+  scrumblerName;
 
   constructor(public navCtrl: NavController, public navParams: NavParams) {
     this.game = navParams.get('game_1');
+    this.scrumblerName = navParams.get('scrumblerName');
     this.computeCurrentScoreEachPlayer();
   }
 

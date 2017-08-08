@@ -17,7 +17,7 @@
           <div>Ele <b>{{winner.getDueValue() < 0 ? 'tem '+ winner.getDueValue() +' em haver no caixa ' : 'devia '+ winner.getDueValue() +' para o caixa ' }}</b> e deve receber os seguintes valores dos outros jogadores:</div>
            <div *ngFor="let player of game.allPlayers; let i=index" class="panel panel-default">
              <div *ngIf="player.id != winner.id">
-               <b>{{player.name}}</b> pagou <b>{{player.valuePaid}}</b> e reentrou <b>{{player.reentries}}</b> vezes, portanto tem que <b>{{player.getDueValue() >= 0 ? ' pagar ' : ' receber '}}</b> R$ <b>{{player.getDueValue()}}</b>
+               <b>{{player.name}}</b> pagou <b>{{player.valuePaid}}</b> e reentrou <b>{{player.reentries}}</b> vezes, portanto tem que <b>{{player.getDueValue() >= 0 ? ' pagar ' : ' receber '}}</b> R$ <b>{{player.getAbsDueValue()}}</b>
                <br/>
              </div>
            </div>

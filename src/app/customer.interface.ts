@@ -21,6 +21,10 @@ export class Player {
     return (this.reentries + 1 - this.valuePaid);
   }
 
+  getAbsDueValue() {
+    return Math.abs(this.reentries + 1 - this.valuePaid);
+  }
+
   getPointsToEscape() {
     return (99 - this.currentScore)
   }

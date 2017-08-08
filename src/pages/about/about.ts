@@ -82,9 +82,9 @@ export class GamePage {
       if (!this.winner) {
         let somePlayerBoom = this.someoneGetsBoomed();
         if (somePlayerBoom) {
-          this.navCtrl.setRoot(EntradaPage, {game_1: this.game, currentMatch: this.currentMatch});
+          this.navCtrl.setRoot(EntradaPage, {game_1: this.game, currentMatch: this.currentMatch, scrumblerName: this.scrumblerName});
         } else {
-          this.navCtrl.setRoot(ContactPage, {game_1: this.game});
+          this.navCtrl.setRoot(ContactPage, {game_1: this.game, scrumblerName: this.scrumblerName});
         }
       }
     } else {

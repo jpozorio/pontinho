@@ -10,6 +10,7 @@ import {ContactPage} from "../contact/contact";
 })
 export class EntradaPage {
 
+  scrumblerName;
   game: Game;
   currentMatch: Match;
   public reentriesForm: FormGroup;
@@ -17,6 +18,7 @@ export class EntradaPage {
   constructor(public navCtrl: NavController, private _fb: FormBuilder, public navParams: NavParams) {
     this.game = navParams.get('game_1');
     this.currentMatch = navParams.get('currentMatch');
+    this.scrumblerName = navParams.get('scrumblerName');
   }
 
   ngOnInit() {
@@ -42,6 +44,6 @@ export class EntradaPage {
   }
 
   finishReentriesCad() {
-    this.navCtrl.setRoot(ContactPage, {game_1: this.game});
+    this.navCtrl.setRoot(ContactPage, {game_1: this.game, scrumblerName: this.scrumblerName});
   }
 }
