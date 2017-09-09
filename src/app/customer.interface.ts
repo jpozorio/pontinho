@@ -77,6 +77,26 @@ export class Game {
     return this.allPlayers[this.discoverScrumbler(this.scrumbler)].name;
   }
 
+  getMaxPointsOfAllPlayers() {
+    let max = -1;
+    for (let player of this.playersAtGame) {
+      if (player.currentScore > max && !player.getBoomed()) {
+        max = player.currentScore;
+      }
+    }
+    return max;
+  }
+
+  getMinPointsOfAllPlayers() {
+    let min = 1000;
+    for (let player of this.playersAtGame) {
+      if (player.currentScore < min && !player.getBoomed()) {
+        min = player.currentScore;
+      }
+    }
+    return min;
+  }
+
   private discoverScrumbler(currentScrumbler: number) {
     currentScrumbler = ((currentScrumbler + 1) % (this.allPlayers.length));
     for (let player of this.allPlayers) {

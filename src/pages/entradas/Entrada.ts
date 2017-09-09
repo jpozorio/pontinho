@@ -2,14 +2,16 @@ import {Component} from "@angular/core";
 import {NavController, NavParams} from "ionic-angular";
 import {Game, Match, Player} from "../../app/customer.interface";
 import {FormBuilder, FormGroup} from "@angular/forms";
-import {ContactPage} from "../contact/contact";
+import {GameOverviewPage} from "../overview/GameOverview";
 
 @Component({
   selector: 'page-entrada',
-  templateUrl: 'entrada.html'
+  templateUrl: 'Entrada.html'
 })
 export class EntradaPage {
 
+  max;
+  min;
   scrumblerName;
   game: Game;
   currentMatch: Match;
@@ -19,6 +21,8 @@ export class EntradaPage {
     this.game = navParams.get('game_1');
     this.currentMatch = navParams.get('currentMatch');
     this.scrumblerName = navParams.get('scrumblerName');
+    this.max = this.game.getMaxPointsOfAllPlayers();
+    this.min = this.game.getMinPointsOfAllPlayers();
   }
 
   ngOnInit() {
@@ -44,6 +48,6 @@ export class EntradaPage {
   }
 
   finishReentriesCad() {
-    this.navCtrl.setRoot(ContactPage, {game_1: this.game, scrumblerName: this.scrumblerName});
+    this.navCtrl.setRoot(GameOverviewPage, {game_1: this.game, scrumblerName: this.scrumblerName});
   }
 }

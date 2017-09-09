@@ -2,11 +2,11 @@ import {Component} from "@angular/core";
 import {NavController, NavParams} from "ionic-angular";
 import {Game, Player} from "../../app/customer.interface";
 import {AbstractControl, FormArray, FormBuilder, FormGroup, Validators} from "@angular/forms";
-import {GamePage} from "../about/about";
+import {GamePage} from "../game/Game";
 
 @Component({
   selector: 'page-home',
-  templateUrl: 'home.html'
+  templateUrl: 'CadPlayers.html'
 })
 export class CadPlayers {
 
@@ -15,12 +15,15 @@ export class CadPlayers {
 
   constructor(public navCtrl: NavController, private _fb: FormBuilder, public navParams: NavParams) {
     this.game = new Game();
-    let oldGame = navParams.get('game_1');
+    let oldGame:Game = navParams.get('game_1');
+    let winner:Player = navParams.get('winner');
     if (oldGame) {
-      for (let oldPlayer of oldGame.allPlayers) {
-        let newPlayer = new Player();
+      let idPlayer = 0;
+      for (let oldPlayer_idx = winner.id;  idPlayer < oldGame.allPlayers.length; oldPlayer_idx++, idPlayer++) {
+        let oldPlayer:Player = oldGame.allPlayers[oldPlayer_idx % oldGame.allPlayers.length];
+        let newPlayer:Player = new Player();
         newPlayer.name = oldPlayer.name;
-        newPlayer.id = oldPlayer.id;
+        newPlayer.id = idPlayer;
         newPlayer.valuePaid = 0;
         this.game.addPlayer(newPlayer)
       }
@@ -88,9 +91,9 @@ export class CadPlayers {
     for (controlPlayer of control.controls) {
       let p: Player = new Player();
       p.name = controlPlayer.get('name').value;
-      p.valuePaid = parseInt(controlPlayer.get('vlrPago').value);
-      p.id = idPlayer++;
       if (p.name) {
+        p.valuePaid = parseInt(controlPlayer.get('vlrPago').value);
+        p.id = idPlayer++;
         this.game.addPlayer(p);
       }
     }

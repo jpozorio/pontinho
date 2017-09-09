@@ -1,14 +1,14 @@
 import {Component} from '@angular/core';
 import {NavController, NavParams} from 'ionic-angular';
-import {GamePage} from "../about/about";
+import {GamePage} from "../game/Game";
 import {Game} from "../../app/customer.interface";
-import {HandHistoryPage} from "../handHistory/handHistory";
+import {HandHistoryPage} from "../handHistory/HandHistory";
 
 @Component({
   selector: 'page-contact',
-  templateUrl: 'contact.html'
+  templateUrl: 'GameOverview.html'
 })
-export class ContactPage {
+export class GameOverviewPage {
 
   game: Game;
   scrumblerName;
@@ -25,7 +25,7 @@ export class ContactPage {
 
 
   private computeCurrentScoreEachPlayer() {
-    let max = this.getMaxPointsOfAllPlayers();
+    let max = this.game.getMaxPointsOfAllPlayers();
     for (let idx = this.game.playersAtGame.length - 1; idx >= 0; idx--) {
       let player = this.game.playersAtGame[idx];
       if (player.getBoomed()) {
@@ -37,16 +37,6 @@ export class ContactPage {
         }
       }
     }
-  }
-
-  private getMaxPointsOfAllPlayers() {
-    let max = -1;
-    for (let player of this.game.playersAtGame) {
-      if (player.currentScore > max && !player.getBoomed()) {
-        max = player.currentScore;
-      }
-    }
-    return max;
   }
 
   viewHandHistory() {

@@ -8,6 +8,7 @@
 
 <ion-content padding>
   <div class="container">
+    <div>A entrada é {{max}} a {{min}}</div>
     <form [formGroup]="reentriesForm" *ngIf="game.playersAtGame">
       <div formArrayName="reentriesForm">
         <ion-grid>

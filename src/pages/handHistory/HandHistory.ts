@@ -5,7 +5,7 @@ import {FormBuilder} from "@angular/forms";
 
 @Component({
   selector: 'page-handHistory',
-  templateUrl: 'handHistory.html'
+  templateUrl: 'HandHistory.html'
 })
 export class HandHistoryPage {
 

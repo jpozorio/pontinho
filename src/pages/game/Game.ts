@@ -2,13 +2,13 @@ import {Component} from "@angular/core";
 import {NavController, NavParams} from "ionic-angular";
 import {Game, Hand, Match, MAX_POINTS, Player} from "../../app/customer.interface";
 import {FormBuilder, FormGroup} from "@angular/forms";
-import {CadPlayers} from "../home/home";
-import {EntradaPage} from "../entradas/entrada";
-import {ContactPage} from "../contact/contact";
+import {CadPlayers} from "../cadPlayers/CadPlayers";
+import {EntradaPage} from "../entradas/Entrada";
+import {GameOverviewPage} from "../overview/GameOverview";
 
 @Component({
   selector: 'page-about',
-  templateUrl: 'about.html'
+  templateUrl: 'Game.html'
 })
 export class GamePage {
 
@@ -84,7 +84,7 @@ export class GamePage {
         if (somePlayerBoom) {
           this.navCtrl.setRoot(EntradaPage, {game_1: this.game, currentMatch: this.currentMatch, scrumblerName: this.scrumblerName});
         } else {
-          this.navCtrl.setRoot(ContactPage, {game_1: this.game, scrumblerName: this.scrumblerName});
+          this.navCtrl.setRoot(GameOverviewPage, {game_1: this.game, scrumblerName: this.scrumblerName});
         }
       }
     } else {
@@ -114,7 +114,7 @@ export class GamePage {
   }
 
   newGame() {
-    this.navCtrl.setRoot(CadPlayers, {game_1: this.game});
+    this.navCtrl.setRoot(CadPlayers, {game_1: this.game, winner: this.winner});
   }
 
 }
