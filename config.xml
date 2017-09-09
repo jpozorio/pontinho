@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='utf-8'?>
-<widget id="pontinho.dos.pituchas" version="0.0.3" xmlns="http://www.w3.org/ns/widgets">
+<widget id="pontinho.dos.pituchas" version="0.0.4" xmlns="http://www.w3.org/ns/widgets">
     <name>Pontinho dos pituchas</name>
     <description>Marcar pontos do jogo de pontinho</description>
     <author email="jpozorio@gmail.com" href="https://github.com/jpozorio">João Pauo Ozório</author>
