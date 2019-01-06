@@ -1,0 +1,41 @@
+<ion-header>
+	<ion-toolbar>
+		<ion-buttons slot="start">
+			<ion-menu-button></ion-menu-button>
+		</ion-buttons>
+		<ion-title>
+			Lance as entradas
+		</ion-title>
+	</ion-toolbar>
+</ion-header>
+
+<ion-content padding>
+	<div class="container">
+		<div style="padding: 5px">Bora entrar.. Se não entrar não ganha!</div>
+		<div style="padding: 5px" *ngIf="game.anyPlayerReenter">Entrou uma vez, tem que entrar até o ## arreganhar</div>
+		<div style="padding: 5px">A entrada é {{max}} a {{min}}</div>
+		<div *ngIf="game.playersAtGame">
+			<div>
+				<div class="gridHeader linha">
+					<div class="negrito title">Jogador</div>
+					<div class="negrito title">Entrou</div>
+					<div class="negrito title">Pagou</div>
+				</div>
+				<div *ngFor="let player of game.playersAtGame; let i=index">
+					<div *ngIf="player && player.getBoomed()" class="linha">
+						<div class="negrito name-colum flex-grow-1">{{player.name}}</div>
+						<ion-toggle id="entrou_{{i}}" [(ngModel)]="player.currentHand.enter"></ion-toggle>
+
+						<ion-input text-right disabled="{{!player.currentHand.enter}}" type="number"
+								   placeholder="pago" [(ngModel)]="player.currentHand.valuePaid"
+								   id="valorpago_{{i}}"></ion-input>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="linha-botoes">
+			<button class="button-blue" (click)="finishReentriesCad()">Terminei</button>
+		</div>
+	</div>
+</ion-content>

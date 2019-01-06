@@ -1,51 +1,32 @@
-import {ErrorHandler, NgModule} from "@angular/core";
-import {BrowserModule} from "@angular/platform-browser";
-import {IonicApp, IonicErrorHandler, IonicModule} from "ionic-angular";
-import {MyApp} from "./app.component";
+import {NgModule} from '@angular/core';
+import {BrowserModule} from '@angular/platform-browser';
+import {RouteReuseStrategy} from '@angular/router';
 
-import {GamePage} from "../pages/game/Game";
-import {GameOverviewPage} from "../pages/overview/GameOverview";
-import {CadPlayers} from "../pages/cadPlayers/CadPlayers";
-import {TabsPage} from "../pages/tabs/tabs";
+import {IonicModule, IonicRouteStrategy} from '@ionic/angular';
+import {SplashScreen} from '@ionic-native/splash-screen/ngx';
+import {StatusBar} from '@ionic-native/status-bar/ngx';
 
-import {StatusBar} from "@ionic-native/status-bar";
-import {SplashScreen} from "@ionic-native/splash-screen";
-import {PlayerComponent} from "./player.component";
-import {HandComponent} from "./hand.component";
-import {EntradaPage} from "../pages/entradas/Entrada";
-import {HandHistoryPage} from "../pages/handHistory/HandHistory";
+import {AppComponent} from './app.component';
+import {AppRoutingModule} from './app-routing.module';
+import {GameService} from "./game.service";
 
 @NgModule({
-  declarations: [
-    MyApp,
-    GamePage,
-    GameOverviewPage,
-    EntradaPage,
-    HandHistoryPage,
-    CadPlayers,
-    TabsPage,
-    PlayerComponent,
-    HandComponent
-  ],
-  imports: [
-    BrowserModule,
-    IonicModule.forRoot(MyApp)
-  ],
-  bootstrap: [IonicApp],
-  entryComponents: [
-    MyApp,
-    GamePage,
-    GameOverviewPage,
-    HandHistoryPage,
-    EntradaPage,
-    CadPlayers,
-    TabsPage
-  ],
-  providers: [
-    StatusBar,
-    SplashScreen,
-    {provide: ErrorHandler, useClass: IonicErrorHandler}
-  ]
+	declarations: [
+		AppComponent,
+	],
+	entryComponents: [],
+	imports: [
+		BrowserModule,
+		IonicModule.forRoot(),
+		AppRoutingModule
+	],
+	providers: [
+		StatusBar,
+		SplashScreen,
+		GameService,
+		{provide: RouteReuseStrategy, useClass: IonicRouteStrategy}
+	],
+	bootstrap: [AppComponent]
 })
 export class AppModule {
 }

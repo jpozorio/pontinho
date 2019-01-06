@@ -1,0 +1,46 @@
+<ion-header>
+	<ion-toolbar>
+		<ion-buttons slot="start">
+			<ion-menu-button></ion-menu-button>
+		</ion-buttons>
+		<ion-title>
+			Pontos
+		</ion-title>
+	</ion-toolbar>
+</ion-header>
+
+<ion-content padding>
+	<div class="container">
+		<div *ngIf="game.playersAtGame">
+			<div>
+				<div style="padding: 5px">{{mensagem}}</div>
+				<div style="padding: 5px" *ngIf="scrumblerName">O baralho é do jogador: <b>{{scrumblerName}}</b></div>
+				<div class="gridHeader linha">
+					<div class="negrito title flex-grow-1">Jogador</div>
+					<div class="negrito title flex-grow-1">Pontos</div>
+					<div class="negrito title">Estourou</div>
+				</div>
+				<div *ngFor="let player of game.playersAtGame; let i=index">
+					<div *ngIf="player">
+						<div class="linha">
+							<div class="negrito name-colum flex-grow-1">{{player.name}}</div>
+
+							<ion-input class="flex-grow-1" type="number" placeholder="pontos"
+									   [(ngModel)]="player.currentHand.score"
+									   id="pontos_{{i}}"></ion-input>
+
+							<ion-toggle id="estourou_{{i}}" [(ngModel)]="player.currentHand.boom"></ion-toggle>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="linha-botoes">
+			<button class="button-dark" (click)="finishScoreCad()">Terminei</button>
+			<span *ngIf="winner">
+      			<button class="button-blue" (click)="newGame()">Novo jogo</button>
+    		</span>
+		</div>
+	</div>
+</ion-content>

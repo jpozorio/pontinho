@@ -1,0 +1,40 @@
+<ion-header>
+	<ion-toolbar>
+		<ion-buttons slot="start">
+			<ion-menu-button></ion-menu-button>
+		</ion-buttons>
+		<ion-title>
+			Histórico de mãos
+		</ion-title>
+	</ion-toolbar>
+</ion-header>
+
+<ion-content padding>
+	<div class="container">
+		<div *ngIf="game && game.matches">
+			<div class="gridHeader linha justify-space-around">
+				<div class="negrito title flex-basis-5" *ngFor="let player of game.allPlayers; let i=index">
+					{{player.name}}
+				</div>
+			</div>
+			<div *ngFor="let rodada of game.matches; let idxRodada=index" class="linha justify-space-around">
+				<ion-input text-center *ngFor="let hand of rodada.handsOfMatch; let idxPlayer=index"
+						   [value]="hand.score"
+						   (ionChange)="setCurrentScore(hand, hand.score, $event)"
+						   [disabled]="idxRodada !== game.matches.length-1"
+						   [ngClass]="{
+        'playerBoomAndEnter': hand.boom && hand.enter,
+        'playerBoomAndOut': hand.boom && !hand.enter
+        }
+        ">
+				</ion-input>
+			</div>
+			<div class="playerBoomAndEnter padding-10">Estourou e entrou</div>
+			<div class="playerBoomAndOut padding-10">Estourou e saiu do jogo</div>
+		</div>
+
+		<div class="linha-botoes">
+			<button class="button-blue" (click)="lancarPontos()">Terminei</button>
+		</div>
+	</div>
+</ion-content>

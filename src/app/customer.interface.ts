@@ -1,110 +1,138 @@
 export const MAX_POINTS = 100;
 
 export class Player {
-  name: string;
-  valuePaid: number;
-  currentScore: number;
-  reentries: number;
-  id: number;
-  currentHand: Hand;
+	name: string;
+	valuePaid: number;
+	currentScore: number;
+	reentries: number;
+	currentHand?: Hand;
+	allHands: Hand[];
+	scrumbler: boolean;
 
-  constructor() {
-    this.currentScore = 0;
-    this.reentries = 0;
-  }
+	constructor() {
+		this.scrumbler = false;
+		this.name = '';
+		this.currentScore = 0;
+		this.valuePaid = 0;
+		this.reentries = 0;
+		this.allHands = [];
+	}
 
-  getBoomed() {
-    return this.currentScore >= MAX_POINTS;
-  }
+	getBoomed(): boolean {
+		return this.currentScore >= MAX_POINTS;
+	}
 
-  getDueValue() {
-    return (this.reentries + 1 - this.valuePaid);
-  }
+	getDueValue(gameValue: number): number {
+		return (this.valuePaid - ((this.reentries + 1) * gameValue));
+	}
 
-  getAbsDueValue() {
-    return Math.abs(this.reentries + 1 - this.valuePaid);
-  }
+	getAbsDueValue(gameValue: number): number {
+		return Math.abs(((this.reentries + 1) * gameValue) - this.valuePaid);
+	}
 
-  getPointsToEscape() {
-    return (99 - this.currentScore)
-  }
+	getPointsToEscape(): number {
+		return (99 - this.currentScore)
+	}
+
 }
 
 export class Match {
-  handsOfMatch: Hand[];
-
-  getScoreOfPlayer(player: Player) {
-    for (let hand of this.handsOfMatch) {
-      if (hand.player.id == player.id) {
-        return hand.score;
-      }
-    }
-    return '-';
-  }
+	handsOfMatch: Hand[];
+	scoreCadFinished = false;
 }
 
 export class Hand {
-  player: Player;
-  score: number;
-  enter: boolean;
-  valuePaid: number;
+	player: Player;
+	score: number;
+	enter: boolean;
+	boom: boolean;
+	valuePaid: number;
 
-  constructor() {
-    this.enter = false;
-    this.valuePaid = 0;
-  }
+	constructor() {
+		this.enter = false;
+		this.valuePaid = 0;
+	}
 }
 
 export class Game {
-  playersAtGame: Player[];
-  allPlayers: Player[];
-  matches: Match[];
-  private scrumbler: number;
+	playersAtGame: Player[];
+	allPlayers: Player[];
+	matches: Match[];
+	private scrumbler: number;
 
-  constructor() {
-    this.playersAtGame = [];
-    this.allPlayers = [];
-    this.matches = [];
-    this.scrumbler = -1;
-  }
+	constructor() {
+		this.playersAtGame = [];
+		this.allPlayers = [];
+		this.matches = [];
+		this.scrumbler = 0;
+	}
 
-  addPlayer(player: Player) {
-    this.playersAtGame.push(player);
-    this.allPlayers.push(player);
-  }
+	someoneGetsBoomed(): boolean {
+		for (let player of this.playersAtGame) {
+			if (player.currentScore >= MAX_POINTS) {
+				return true;
+			}
+		}
+		return false;
+	}
 
-  nextScrumbler() {
-    return this.allPlayers[this.discoverScrumbler(this.scrumbler)].name;
-  }
+	addPlayer(player: Player) {
+		this.playersAtGame.push(player);
+		this.allPlayers.push(player);
+	}
 
-  getMaxPointsOfAllPlayers() {
-    let max = -1;
-    for (let player of this.playersAtGame) {
-      if (player.currentScore > max && !player.getBoomed()) {
-        max = player.currentScore;
-      }
-    }
-    return max;
-  }
+	nextScrumbler(): string {
+		let finded = false;
+		let scrumblerName = '';
+		for (const p of this.playersAtGame) {
+			if (finded) {
+				p.scrumbler = true;
+				scrumblerName = p.name;
+				break;
+			}
+			if (p.scrumbler) {
+				p.scrumbler = false;
+				finded = true;
+			}
+		}
 
-  getMinPointsOfAllPlayers() {
-    let min = 1000;
-    for (let player of this.playersAtGame) {
-      if (player.currentScore < min && !player.getBoomed()) {
-        min = player.currentScore;
-      }
-    }
-    return min;
-  }
+		if (!finded || !scrumblerName) {
+			if (this.playersAtGame.length > 0) {
+				this.playersAtGame[0].scrumbler = true;
+				scrumblerName = this.playersAtGame[0].name;
+			}
+		}
 
-  private discoverScrumbler(currentScrumbler: number) {
-    currentScrumbler = ((currentScrumbler + 1) % (this.allPlayers.length));
-    for (let player of this.allPlayers) {
-      if (player.id == currentScrumbler && !player.getBoomed()) {
-        this.scrumbler = currentScrumbler;
-        return this.scrumbler;
-      }
-    }
-    return this.discoverScrumbler(currentScrumbler);
-  }
+		return scrumblerName;
+	}
+
+	getMaxPointsOfAllPlayers() {
+		let max = -1;
+		for (let player of this.playersAtGame) {
+			if (player.currentScore > max && !player.getBoomed()) {
+				max = player.currentScore;
+			}
+		}
+		return max;
+	}
+
+	getMinPointsOfAllPlayers() {
+		let min = 1000;
+		for (let player of this.playersAtGame) {
+			if (player.currentScore < min && !player.getBoomed()) {
+				min = player.currentScore;
+			}
+		}
+		return min;
+	}
+
+	get anyPlayerReenter(): boolean {
+		for (let player of this.playersAtGame) {
+			if (player.reentries > 0) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 }

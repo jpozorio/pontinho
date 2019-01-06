@@ -1,0 +1,39 @@
+<ion-header>
+	<ion-toolbar>
+		<ion-buttons slot="start">
+			<ion-menu-button></ion-menu-button>
+		</ion-buttons>
+		<ion-title>
+			Resumo até aqui
+		</ion-title>
+	</ion-toolbar>
+</ion-header>
+
+<ion-content padding>
+	<div class="container">
+		<div style="padding: 5px">Foram jogadas {{game.matches.length}} rodadas</div>
+		<div style="padding: 5px">A entrada é {{max}} a {{min}}</div>
+		<div style="padding: 5px" *ngIf="scrumblerName">Na próxima mão o baralho será de: <b>{{scrumblerName}}</b></div>
+		<div class="linha gridHeader">
+			<div class="negrito title"> Jogador</div>
+			<div class="negrito title"> Pontos</div>
+			<div class="negrito title"> Sai com</div>
+			<div class="negrito title"> Entradas</div>
+		</div>
+		<div *ngFor="let player of game.playersAtGame;" class="panel panel-default">
+			<div class="panel-heading" *ngIf="player">
+				<div class="linha">
+					<div class="negrito padding-item flex-grow-1">{{player.name}}</div>
+					<div class="padding-item">{{player.currentScore}}</div>
+					<div class="padding-item">{{player.getPointsToEscape()}}</div>
+					<div class="padding-item">{{player.reentries}}</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="linha-botoes">
+			<button class="button-blue" (click)="goToCadHand()">Lançar pontos</button>
+			<button class="button-dark" (click)="viewHandHistory()">Histórico de mãos</button>
+		</div>
+	</div>
+</ion-content>

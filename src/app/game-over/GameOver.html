@@ -1,0 +1,39 @@
+<ion-header>
+	<ion-toolbar>
+		<ion-buttons slot="start">
+			<ion-menu-button></ion-menu-button>
+		</ion-buttons>
+		<ion-title>
+			Fim de jogo
+		</ion-title>
+	</ion-toolbar>
+</ion-header>
+
+<ion-content padding>
+	<div class="container">
+		<div style="padding: 5px">Foram jogadas {{game.matches.length}} rodadas</div>
+		<div>
+			<div class="linha gridHeader">
+				<div class="negrito title"> Jogador</div>
+				<div class="negrito title"> Entradas</div>
+				<div class="negrito title"> Pago</div>
+				<div class="negrito title"> Saldo</div>
+			</div>
+		</div>
+		<div *ngFor="let player of game.allPlayers;" class="panel panel-default">
+			<div [ngClass]="{
+        'player-winner': player == winner
+        }"
+        class="linha" *ngIf="player">
+				<div class="padding-item">{{player.name}}</div>
+				<div class="padding-item">{{player.reentries}}</div>
+				<div class="padding-item">{{player.valuePaid}}</div>
+				<div class="padding-item">{{player.getDueValue(gameValue)}}</div>
+			</div>
+		</div>
+
+		<div class="linha-botoes">
+			<button class="button-blue" (click)="viewHandHistory()">Novo jogo</button>
+		</div>
+	</div>
+</ion-content>

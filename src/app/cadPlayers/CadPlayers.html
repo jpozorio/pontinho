@@ -1,0 +1,37 @@
+<ion-header>
+	<ion-toolbar>
+		<ion-buttons slot="start">
+			<ion-menu-button></ion-menu-button>
+		</ion-buttons>
+		<ion-title>
+			Pontinho dos pituchas
+		</ion-title>
+	</ion-toolbar>
+</ion-header>
+
+<ion-content padding>
+<div *ngIf="game.playersAtGame.length > 0 && !winner" class="overlay">
+	O jogo em andamento deve ser finalizado antes de cadastrar um novo
+</div>
+	<div class="container">
+		<div>
+			<div class="gridHeader linha">
+				<div>
+					<div class="negrito title">Nome</div>
+				</div>
+				<div>
+					<div class="negrito title">Valor pago</div>
+				</div>
+			</div>
+		</div>
+		<div *ngFor="let player of players; let i=index" class="linha">
+			<ion-input type="text" placeholder="Nome" [(ngModel)]="player.name"></ion-input>
+			<ion-input text-right type="number" placeholder="Valor pago" [(ngModel)]="player.valuePaid"></ion-input>
+		</div>
+	</div>
+
+	<div class="linha-botoes">
+		<button (click)="newPlayer()" class="button-blue">Novo jogador</button>
+		<button class="button-dark" (click)="finishCadPlayers()">Terminei</button>
+	</div>
+</ion-content>

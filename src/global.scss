@@ -1,0 +1,86 @@
+// http://ionicframework.com/docs/theming/
+@import '~@ionic/angular/css/core.css';
+@import '~@ionic/angular/css/normalize.css';
+@import '~@ionic/angular/css/structure.css';
+@import '~@ionic/angular/css/typography.css';
+
+@import '~@ionic/angular/css/padding.css';
+@import '~@ionic/angular/css/float-elements.css';
+@import '~@ionic/angular/css/text-alignment.css';
+@import '~@ionic/angular/css/text-transformation.css';
+@import '~@ionic/angular/css/flex-utils.css';
+
+.linha {
+	-webkit-box-shadow: 0px 1px 1px #efefef;
+	-moz-box-shadow: 0px 1px 1px #efefef;
+	box-shadow: 0px 1px 1px #efefef;
+	display: flex;
+	flex: 1;
+	flex-direction: row;
+	justify-content: space-between;
+}
+
+.linha-botoes {
+	padding: 10px;
+	display: flex;
+	flex: 1;
+	flex-direction: row;
+	justify-content: space-between;
+}
+
+.justify-space-around {
+	justify-content: space-around;
+}
+
+.name-colum {
+	padding: 10px 0 0 10px;
+}
+
+.config-label {
+	padding: 8px;
+	font-weight: bold;
+}
+
+.title {
+	padding: 10px;
+}
+
+.flex-grow-1 {
+	flex-grow: 1;
+	flex-basis: 30%;
+}
+
+.gridHeader {
+	background-color: #66aeff;
+	box-shadow: 0px 1px 1px #888888;
+	color: #FFFFFF;
+}
+
+.negrito {
+	font-weight: bold;
+}
+
+.center {
+	align-items: center;
+}
+
+.button-blue {
+	padding: 10px;
+	background-color: #66aeff;
+	color: #FFFFFF;
+	font-weight: bold;
+}
+
+.button-dark {
+	padding: 10px;
+	background-color: #000000;
+	color: #FFFFFF;
+	font-weight: bold;
+}
+
+.button-red {
+	padding: 10px;
+	background-color: #ef3400;
+	color: #FFFFFF;
+	font-weight: bold;
+}
