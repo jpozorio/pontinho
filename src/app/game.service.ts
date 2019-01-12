@@ -14,6 +14,7 @@ export class GameService {
 			let player = this.game.playersAtGame[idx];
 			if (player.getBoomed()) {
 				if (player.currentHand.enter) {
+					player.currentHand.boom = true;
 					player.currentScore = max;
 					player.reentries++;
 					player.valuePaid += player.currentHand.valuePaid;

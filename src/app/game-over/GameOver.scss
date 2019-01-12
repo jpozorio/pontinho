@@ -1,9 +1,16 @@
 .player-winner {
 	background: #0acc00;
+	opacity: .5%;
 }
 
 .padding-item {
 	flex: auto;
 	padding: 10px;
 	text-align: center;
+}
+
+.padding-10 {
+	text-align: center;
+	padding: 10px;
+	margin-top: 10px;
 }
