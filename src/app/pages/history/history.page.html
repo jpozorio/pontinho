@@ -1,0 +1,65 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Histórico</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  @if (rounds().length === 0) {
+    <p class="empty">Nenhuma rodada fechada ainda</p>
+  } @else {
+    <div class="scroll">
+      <table>
+        <thead>
+          <tr>
+            <th class="rn">#</th>
+            @for (n of players(); track n) {
+              <th>{{ n }}</th>
+            }
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of rounds(); track $index; let i = $index) {
+            <tr class="round" [attr.data-round]="i + 1" (click)="edit(i)">
+              <th class="rn">{{ i + 1 }}</th>
+              @for (c of row; track $index) {
+                <td [class.out]="c.out" [class.bust]="c.busted">
+                  @if (c.points === null) {
+                    –
+                  } @else if (c.busted) {
+                    💥
+                  } @else {
+                    {{ c.points }}
+                  }
+                  @if (c.reenteredWith !== undefined) {
+                    <span class="re">↻ {{ c.reenteredWith }}</span>
+                  }
+                </td>
+              }
+            </tr>
+          }
+        </tbody>
+        <tfoot>
+          <tr class="sum">
+            <th class="rn">Σ</th>
+            @for (f of footer(); track $index) {
+              <td [class.out]="f.level === 'out'">{{ f.total }}</td>
+            }
+          </tr>
+          <tr class="left">
+            <th class="rn">faltam</th>
+            @for (f of footer(); track $index) {
+              <td [class]="f.level">{{ f.left }}</td>
+            }
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+    @if (message(); as msg) {
+      <p class="error" role="alert">{{ msg }}</p>
+    }
+    <ion-button expand="block" fill="outline" color="danger" class="undo" data-undo (click)="undoLast()">
+      Desfazer última rodada
+    </ion-button>
+  }
+</ion-content>
