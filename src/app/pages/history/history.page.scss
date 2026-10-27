@@ -1,0 +1,97 @@
+.empty {
+  text-align: center;
+  color: var(--ion-color-medium);
+  margin: 32px 16px;
+}
+
+.scroll {
+  overflow: auto;
+  height: 100%;
+}
+
+table {
+  border-collapse: separate;
+  border-spacing: 0;
+  width: 100%;
+}
+
+th,
+td {
+  min-width: 64px;
+  height: 36px;
+  box-sizing: border-box;
+  padding: 4px 6px;
+  text-align: center;
+  white-space: nowrap;
+  border-bottom: 1px solid var(--ion-color-light-shade);
+  background: var(--ion-background-color, #fff);
+}
+
+thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  font-size: 0.85rem;
+}
+
+.rn {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  min-width: 48px;
+  color: var(--ion-color-medium);
+}
+
+thead .rn {
+  z-index: 3;
+}
+
+tr.round {
+  cursor: pointer;
+}
+
+td.bust {
+  color: var(--ion-color-danger);
+}
+
+.re {
+  display: block;
+  font-size: 0.7rem;
+  line-height: 1;
+  color: var(--ion-color-warning-shade);
+}
+
+tfoot {
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
+
+  td,
+  th {
+    font-weight: 700;
+    border-top: 1px solid var(--ion-color-medium);
+  }
+  .rn {
+    z-index: 4;
+  }
+}
+
+td.ok {
+  color: var(--ion-color-success-shade);
+}
+td.near {
+  color: var(--ion-color-warning-shade);
+}
+td.out {
+  color: var(--ion-color-medium);
+  background: var(--ion-color-light);
+}
+
+.error {
+  color: var(--ion-color-danger);
+  margin: 8px 16px 0;
+}
+
+.undo {
+  margin: 12px 16px;
+}

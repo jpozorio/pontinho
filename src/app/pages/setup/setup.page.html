@@ -1,0 +1,76 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Novo jogo</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  @if (blockingGame()) {
+    <div class="warning">
+      <p>Há uma partida em andamento. Para começar outra, abandone a atual.</p>
+      <ion-button color="danger" (click)="confirmOpen.set(true)">Abandonar partida atual</ion-button>
+      <ion-button fill="outline" routerLink="/jogo/rodada">Voltar para a partida</ion-button>
+    </div>
+  }
+  @if (finishedGame()) {
+    <div class="warning">
+      <p>A partida anterior terminou.</p>
+      <ion-button fill="outline" routerLink="/fim">Ver fim de jogo</ion-button>
+    </div>
+  }
+
+  <h2>Jogadores</h2>
+  <p class="hint">Arraste para mudar a ordem: o primeiro dá as cartas.</p>
+
+  <ion-list>
+    <ion-reorder-group [disabled]="false" (ionReorderEnd)="onReorder($event)">
+      @for (row of rows(); track row.id; let i = $index) {
+        <ion-item>
+          <ion-input
+            [label]="'Jogador ' + (i + 1)"
+            labelPlacement="floating"
+            [value]="row.name"
+            (ionInput)="setName(row.id, $event)"
+          ></ion-input>
+          @if (debtHints().get(row.id); as d) {
+            <span class="debt" slot="end">deve {{ d | currency: 'BRL' }}</span>
+          }
+          <ion-button fill="clear" color="medium" slot="end" aria-label="Remover jogador" (click)="remove(row.id)">
+            ✕
+          </ion-button>
+          <ion-reorder slot="end"></ion-reorder>
+        </ion-item>
+      }
+    </ion-reorder-group>
+  </ion-list>
+  <ion-button fill="outline" (click)="add()">+ jogador</ion-button>
+
+  <h2>Regras</h2>
+  <ion-item>
+    <ion-input
+      label="Entrada (R$)"
+      labelPlacement="floating"
+      inputmode="decimal"
+      [value]="entryText()"
+      (ionInput)="entryText.set(inputValue($event))"
+    ></ion-input>
+  </ion-item>
+  <p class="hint">Reentrada</p>
+  <ion-segment [value]="reentryLimit()" (ionChange)="onReentry($event)">
+    <ion-segment-button value="one"><ion-label>Uma vez</ion-label></ion-segment-button>
+    <ion-segment-button value="unlimited"><ion-label>Ilimitada</ion-label></ion-segment-button>
+  </ion-segment>
+
+  @if (error(); as e) {
+    <p class="error">{{ e }}</p>
+  }
+  <ion-button expand="block" [disabled]="!!error() || !!game()" (click)="start()">Começar</ion-button>
+
+  <ion-alert
+    [isOpen]="confirmOpen()"
+    header="Abandonar a partida atual?"
+    message="Os pontos e pagamentos desta partida serão descartados."
+    [buttons]="alertButtons"
+    (didDismiss)="onAlertDismiss($event)"
+  ></ion-alert>
+</ion-content>

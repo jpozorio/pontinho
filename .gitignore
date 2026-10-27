@@ -21,14 +21,21 @@ dist/
 node_modules/
 tmp/
 temp/
-hooks/
-platforms/
-plugins/
-plugins/android.json
-plugins/ios.json
-www/
 $RECYCLE.BIN/
 
 .DS_Store
 Thumbs.db
 UserInterfaceState.xcuserstate
+
+.superpowers/
+.claude/worktrees/
+
+# Angular
+/.angular/
+/out-tsc
+/bazel-out
+npm-debug.log
+yarn-error.log
+/connect.lock
+testem.log
+__screenshots__/
