@@ -47,7 +47,9 @@ export class HistoryPage {
   readonly footer = computed<FooterCell[]>(() =>
     (this.view()?.players ?? []).map((p: PlayerView): FooterCell => {
       if (p.status === 'out') return { total: '–', left: '–', level: 'out' };
-      const level: LeftLevel = p.status === 'deciding' ? 'bust' : leftLevel(p.pointsLeft);
+      // quem estourou e ainda não reentrou fica com 💥; quem vai reentrar já mostra o que falta (como na Rodada)
+      const bust = p.status === 'deciding' && p.decision !== 'reenter';
+      const level: LeftLevel = bust ? 'bust' : leftLevel(p.pointsLeft);
       return { total: String(p.total), left: level === 'bust' ? '💥' : String(p.pointsLeft), level };
     }),
   );

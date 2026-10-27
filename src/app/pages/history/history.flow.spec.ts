@@ -41,6 +41,20 @@ describe('HistoryPage footer', () => {
     expect(left[7].classList.contains('near')).toBe(true);
   });
 
+  it('shows 💥 for a busted player until they reenter, then the real faltam', () => {
+    const { store, fixture, el } = setup(2);
+    const hugo = () => el.querySelectorAll('tfoot tr.left td')[7].textContent!.trim();
+    expect(hugo()).toBe('💥');
+    store.decide('Hugo', 'reenter');
+    fixture.detectChanges();
+    expect(store.view()!.players[7].total).toBe(20);
+    expect(hugo()).toBe('79');
+    expect(el.querySelectorAll('tfoot tr.sum td')[7].textContent!.trim()).toBe('20');
+    store.decide('Hugo', 'out');
+    fixture.detectChanges();
+    expect(hugo()).toBe('💥');
+  });
+
   it('shows a dash for an out player', () => {
     const { store, fixture, el } = setup(2);
     store.decide('Hugo', 'out');
