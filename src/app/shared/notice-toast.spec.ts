@@ -64,7 +64,7 @@ describe('showStoreNotice', () => {
     withAgreement(store);
     const fixture = TestBed.createComponent(RoundPage);
     fixture.detectChanges();
-    await fixture.componentInstance.decide('Carla', new CustomEvent('ionChange', { detail: { value: 'reenter' } }));
+    await fixture.componentInstance.decide('Carla', 'reenter');
     expect(store.game()!.agreement).toBeUndefined();
     expect(create.mock.calls[0][0]?.message).toContain('O acordo foi desfeito');
   });

@@ -32,20 +32,20 @@
           }
           @if (r.p.status === 'out' || (r.p.status === 'deciding' && !r.p.canReenter)) {
             <span class="out">saiu</span>
-          } @else if (r.p.status === 'deciding') {
-            <span class="decide">
-              estourou —
-              <ion-segment
-                [value]="r.p.decision ?? null"
-                (ionChange)="decide(r.p.name, $event)"
-                [attr.data-decide]="r.p.name"
-              >
-                <ion-segment-button value="reenter">reentra</ion-segment-button>
-                <ion-segment-button value="out">sai</ion-segment-button>
-              </ion-segment>
-            </span>
+          } @else if (r.p.status === 'deciding' && r.p.decision) {
+            <button type="button" class="tag" [attr.data-change-decision]="r.p.name" (click)="changeDecision(r.p)">
+              {{ r.p.decision === 'reenter' ? '↻ reentrou' : 'saiu' }}
+            </button>
           }
         </div>
+
+        @if (r.p.status === 'deciding' && r.p.canReenter && !r.p.decision) {
+          <div class="pending" [attr.data-pending]="r.p.name">
+            <span>Estourou na rodada {{ bustRound() }}:</span>
+            <ion-button size="small" data-decide="reenter" (click)="decide(r.p.name, 'reenter')">reentra</ion-button>
+            <ion-button size="small" fill="outline" data-decide="out" (click)="decide(r.p.name, 'out')">sai</ion-button>
+          </div>
+        }
 
         @if (r.p.playsNextRound) {
           <ion-input

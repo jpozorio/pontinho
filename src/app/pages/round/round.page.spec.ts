@@ -115,6 +115,63 @@ describe('RoundPage', () => {
     expect(nav).toHaveBeenCalledWith('/novo');
   });
 
+  describe('decisão de quem estourou na rodada anterior', () => {
+    function busted(decision?: 'reenter' | 'out') {
+      localStorage.clear();
+      TestBed.resetTestingModule();
+      TestBed.configureTestingModule({ providers: [provideIonicAngular({ mode: 'md' }), provideRouter([])] });
+      const store = TestBed.inject(GameStore);
+      store.startGame({ entryValue: 5, reentryLimit: 'unlimited', players: ['Ana', 'Beto', 'Carla'] });
+      store.setDraftScore('Ana', 'bust');
+      store.setDraftScore('Beto', 10);
+      store.setDraftScore('Carla', 20);
+      expect(store.closeRound()).toBe(true);
+      if (decision) expect(store.decide('Ana', decision)).toBe(true);
+      const fixture = TestBed.createComponent(RoundPage);
+      fixture.detectChanges();
+      return { store, fixture, el: fixture.nativeElement as HTMLElement };
+    }
+
+    it('shows only a small tag, not the segment, once the player reentered', () => {
+      const { el } = busted('reenter');
+      const row = el.querySelector('[data-row="Ana"]')!;
+      expect(row.querySelector('ion-segment')).toBeNull();
+      expect(row.querySelector('[data-change-decision="Ana"]')!.textContent).toContain('↻ reentrou');
+      expect(row.querySelector('ion-input[data-player="Ana"]')).not.toBeNull();
+    });
+
+    it('shows "saiu" as a tag once the player chose to leave', () => {
+      const { el } = busted('out');
+      const row = el.querySelector('[data-row="Ana"]')!;
+      expect(row.querySelector('ion-segment')).toBeNull();
+      expect(row.querySelector('[data-change-decision="Ana"]')!.textContent).toContain('saiu');
+      expect(row.querySelector('ion-input[data-player="Ana"]')).toBeNull();
+    });
+
+    it('asks about the previous round on its own line when there is no decision yet', () => {
+      const { store, fixture, el } = busted();
+      const ask = el.querySelector('[data-row="Ana"] [data-pending="Ana"]')!;
+      expect(ask.textContent).toContain('Estourou na rodada 1:');
+      (ask.querySelector('[data-decide="reenter"]') as HTMLElement).click();
+      fixture.detectChanges();
+      expect(store.view()!.players[0].decision).toBe('reenter');
+    });
+
+    it('changes a decision only after confirming, naming the round', async () => {
+      const { store, fixture } = busted('reenter');
+      const create = vi.spyOn(TestBed.inject(AlertController), 'create').mockResolvedValue(fake('cancel') as never);
+      await fixture.componentInstance.changeDecision(store.view()!.players[0]);
+      expect(create.mock.calls[0][0]).toMatchObject({ header: 'Ana estourou na rodada 1. Mudar para: sai?' });
+      expect(store.view()!.players[0].decision).toBe('reenter');
+      create.mockResolvedValue(fake('confirm') as never);
+      await fixture.componentInstance.changeDecision(store.view()!.players[0]);
+      expect(store.view()!.players[0].decision).toBe('out');
+      await fixture.componentInstance.changeDecision(store.view()!.players[0]);
+      expect(create.mock.calls[2][0]).toMatchObject({ header: 'Ana estourou na rodada 1. Mudar para: reentra com 20?' });
+      expect(store.view()!.players[0].decision).toBe('reenter');
+    });
+  });
+
   it('says the game is over when closing a finished game', async () => {
     const { store, fixture, el } = setup();
     vi.spyOn(store, 'closeRound').mockReturnValue(false);
