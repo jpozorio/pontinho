@@ -54,23 +54,24 @@ describe('GameStore', () => {
     expect(s.defaultConfig()).toEqual({ entryValue: 7, reentryLimit: 'one' });
   });
 
-  it('archiveAndPrepareNext puts winner first', () => {
+  it('archiveFinished archives and nextConfig puts winner first, surviving reload', () => {
     const s = fresh();
-    s.startGame(config);
+    expect(s.nextConfig()).toBeNull();
+    s.startGame({ ...config, entryValue: 2.5, reentryLimit: 'one' });
     finishWithCarla(s);
-    const next = s.archiveAndPrepareNext();
-    expect(next?.players).toEqual(['Carla', 'Ana', 'Beto']);
+    expect(s.archiveFinished()).toBe(true);
     expect(s.data().current).toBeNull();
     expect(s.data().finished.length).toBe(1);
-    expect(s.pendingConfig()).toEqual(next);
-    expect(s.consumePendingConfig()).toEqual(next);
-    expect(s.pendingConfig()).toBeNull();
+    const next = { entryValue: 2.5, reentryLimit: 'one', players: ['Carla', 'Ana', 'Beto'] };
+    expect(s.nextConfig()).toEqual(next);
+    TestBed.tick();
+    expect(fresh().nextConfig()).toEqual(next);
   });
 
-  it('archiveAndPrepareNext does nothing without a winner', () => {
+  it('archiveFinished does nothing without a winner', () => {
     const s = fresh();
     s.startGame(config);
-    expect(s.archiveAndPrepareNext()).toBeNull();
+    expect(s.archiveFinished()).toBe(false);
     expect(s.game()).not.toBeNull();
     expect(s.data().finished.length).toBe(0);
   });
@@ -88,7 +89,7 @@ describe('GameStore', () => {
     const s = fresh();
     s.startGame(config);
     finishWithCarla(s);
-    s.archiveAndPrepareNext();
+    s.archiveFinished();
     s.startGame({ ...config, players: ['Carla', 'Ana', 'Beto'] });
     expect(s.debtsFor(['Ana']).map((d) => d.debtor)).toEqual(['Ana']);
     expect(s.debtsFor(['Zed'])).toEqual([]);

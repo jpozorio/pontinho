@@ -111,7 +111,7 @@ describe('MoneyPage debts', () => {
     store.setDraftScore('Beto', 'bust');
     store.setDraftScore('Carla', 5);
     expect(store.closeRound()).toBe(true);
-    store.archiveAndPrepareNext();
+    store.archiveFinished();
     store.startGame({ entryValue: 5, reentryLimit: 'unlimited', players: ['Carla', 'Ana', 'Beto'] });
     const fixture = TestBed.createComponent(MoneyPage);
     fixture.detectChanges();

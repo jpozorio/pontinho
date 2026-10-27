@@ -68,8 +68,8 @@
 
   <ion-alert
     [isOpen]="confirmOpen()"
-    header="Abandonar partida atual?"
-    message="A partida em andamento será descartada e não poderá ser recuperada."
+    [header]="abandonHeader"
+    [message]="abandonMessage"
     [buttons]="alertButtons"
     (didDismiss)="onAlertDismiss($event)"
   ></ion-alert>

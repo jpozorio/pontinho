@@ -67,6 +67,6 @@ export class GameOverPage {
   }
 
   async newGame(): Promise<void> {
-    if (this.store.archiveAndPrepareNext()) await this.router.navigateByUrl('/novo');
+    if (this.store.archiveFinished()) await this.router.navigateByUrl('/novo');
   }
 }

@@ -18,6 +18,8 @@ import {
   IonToolbar,
 } from '@ionic/angular';
 import { ReentryLimit } from '../../domain/model';
+import { ABANDON_HEADER, ABANDON_MESSAGE } from '../../shared/abandon';
+import { parseAmount } from '../../shared/parse-amount';
 import { GameStore } from '../../state/game-store';
 import { computeDebts } from '../../domain/money';
 import { canonicalName, validatePlayers } from './validate-players';
@@ -75,11 +77,10 @@ export class SetupPage {
     { text: 'Abandonar', role: 'confirm' },
   ];
 
-  readonly entryValue = computed(() => {
-    const text = this.entryText().trim();
-    const n = Number(text.replace(',', '.'));
-    return text !== '' && Number.isFinite(n) && n > 0 ? n : null;
-  });
+  readonly abandonHeader = ABANDON_HEADER;
+  readonly abandonMessage = ABANDON_MESSAGE;
+
+  readonly entryValue = computed(() => parseAmount(this.entryText()));
 
   /** Dívida total por jogador conhecido (nome na grafia guardada). */
   private readonly debtors = computed(() => {
@@ -116,17 +117,21 @@ export class SetupPage {
   });
 
   constructor() {
-    const pending = this.store.consumePendingConfig();
-    if (pending) {
-      this.rows.set(pending.players.map((name) => this.row(name)));
-      this.entryText.set(String(pending.entryValue));
-      this.reentryLimit.set(pending.reentryLimit);
-    } else {
-      const d = this.store.defaultConfig();
-      this.rows.set(Array.from({ length: 4 }, () => this.row('')));
-      this.entryText.set(String(d.entryValue));
-      this.reentryLimit.set(d.reentryLimit);
-    }
+    this.resetForm();
+  }
+
+  /** O Ionic reaproveita a página na pilha: o formulário é refeito a cada entrada. */
+  ionViewWillEnter(): void {
+    this.resetForm();
+  }
+
+  /** Sem partida atual, vem a próxima (vencedor primeiro); senão, linhas vazias com a última regra. */
+  private resetForm(): void {
+    const next = this.game() ? null : this.store.nextConfig();
+    const d = next ?? this.store.defaultConfig();
+    this.rows.set(next ? next.players.map((name) => this.row(name)) : Array.from({ length: 4 }, () => this.row('')));
+    this.entryText.set(String(d.entryValue).replace('.', ','));
+    this.reentryLimit.set(d.reentryLimit);
   }
 
   private row(name: string): Row {
@@ -162,7 +167,9 @@ export class SetupPage {
 
   onAlertDismiss(ev: Event): void {
     this.confirmOpen.set(false);
-    if ((ev as CustomEvent<{ role?: string }>).detail?.role === 'confirm') this.store.abandonGame();
+    if ((ev as CustomEvent<{ role?: string }>).detail?.role !== 'confirm') return;
+    this.store.abandonGame();
+    if (this.filled().length === 0) this.resetForm();
   }
 
   start(): void {

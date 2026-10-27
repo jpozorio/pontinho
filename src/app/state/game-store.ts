@@ -44,7 +44,6 @@ function legacyEntryValue(): number {
 export class GameStore {
   private readonly _data = signal<AppData>(load());
   private readonly _error = signal<ActionError | AgreementError | null>(null);
-  private readonly _pending = signal<GameConfig | null>(null);
 
   readonly data: Signal<AppData> = this._data.asReadonly();
   readonly game: Signal<Game | null> = computed(() => this._data().current);
@@ -57,7 +56,6 @@ export class GameStore {
     return g ? computeMoney(g, computeDebts(this._data().finished)) : null;
   });
   readonly lastError: Signal<ActionError | AgreementError | null> = this._error.asReadonly();
-  readonly pendingConfig: Signal<GameConfig | null> = this._pending.asReadonly();
 
   constructor() {
     effect(() => {
@@ -74,10 +72,13 @@ export class GameStore {
     return this._data().lastConfig ?? { entryValue: legacyEntryValue(), reentryLimit: 'unlimited' };
   }
 
-  consumePendingConfig(): GameConfig | null {
-    const c = this._pending();
-    this._pending.set(null);
-    return c;
+  /** Pré-preenchimento da próxima partida: os jogadores da última terminada, vencedor primeiro. */
+  nextConfig(): GameConfig | null {
+    const last = this._data().finished.at(-1);
+    if (!last) return null;
+    const players = last.config.players;
+    const at = Math.max(0, players.indexOf(computeGame(last).winner ?? ''));
+    return { ...last.config, players: [...players.slice(at), ...players.slice(0, at)] };
   }
 
   startGame(config: GameConfig): void {
@@ -125,21 +126,13 @@ export class GameStore {
     this.apply((g) => ({ game: clearAgreement(g) }));
   }
 
-  archiveAndPrepareNext(): GameConfig | null {
+  /** Guarda a partida terminada entre as finalizadas; false se não houver vencedor. */
+  archiveFinished(): boolean {
     const g = this.game();
-    if (!g || g.finishedAt === undefined) return null;
-    const winner = computeGame(g).winner;
-    if (winner === null) return null;
-    const players = g.config.players;
-    const at = players.indexOf(winner);
-    const next: GameConfig = {
-      ...g.config,
-      players: [...players.slice(at), ...players.slice(0, at)],
-    };
+    if (!g || g.finishedAt === undefined || computeGame(g).winner === null) return false;
     this._error.set(null);
     this._data.update((d) => ({ ...d, current: null, finished: [...d.finished, g] }));
-    this._pending.set(next);
-    return next;
+    return true;
   }
 
   abandonGame(): void {
