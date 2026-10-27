@@ -21,12 +21,9 @@ export type CashError = 'invalid-amount' | 'exceeds-cash' | 'same-player' | 'cas
 
 /** Resultado por jogador de uma partida (terminada: acerto; em andamento: −o que pôs). */
 function gameResults(game: Game): [string, number][] {
-  const money = computeMoney(game, []);
+  const money = computeMoney(game);
   if (money.settlement) return money.settlement.rows.map((r): [string, number] => [r.player, r.balance]);
-  return computeGame(game).players.map((p): [string, number] => [
-    p.name,
-    -cents((1 + p.reentries) * game.config.entryValue),
-  ]);
+  return Object.entries(money.put).map(([p, v]): [string, number] => [p, -v]);
 }
 
 function cashOf(movements: Movement[]): number {

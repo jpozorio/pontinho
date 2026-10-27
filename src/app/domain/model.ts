@@ -17,6 +17,7 @@ export interface Round {
   decisions: Record<string, Decision>;
 }
 
+/** Pagamento por partida do formato v1 (só para migração). */
 export interface Payment {
   id: string;
   player: string;
@@ -35,15 +36,7 @@ export interface Game {
   config: GameConfig;
   rounds: Round[];
   draft: Record<string, Score>;
-  payments: Payment[];
   agreement?: Agreement;
-}
-
-export interface AppData {
-  version: 1;
-  current: Game | null;
-  finished: Game[];
-  lastConfig?: { entryValue: number; reentryLimit: ReentryLimit };
 }
 
 export type Movement =
@@ -69,6 +62,25 @@ export interface Pending {
   date: string;
 }
 
+export interface AppData {
+  version: 2;
+  current: Game | null;
+  night: Night | null;
+  pendings: Pending[];
+  lastFinished?: Game;
+  lastConfig?: { entryValue: number; reentryLimit: ReentryLimit };
+}
+
+/** Partida do formato v1: tinha pagamentos próprios. */
+export type GameV1 = Game & { payments?: Payment[] };
+
+export interface AppDataV1 {
+  version: 1;
+  current: GameV1 | null;
+  finished: GameV1[];
+  lastConfig?: AppData['lastConfig'];
+}
+
 export function newNight(now: Date = new Date()): Night {
   return { id: crypto.randomUUID(), startedAt: now.toISOString(), games: [], movements: [] };
 }
@@ -80,6 +92,5 @@ export function newGame(config: GameConfig, now: Date = new Date()): Game {
     config,
     rounds: [],
     draft: {},
-    payments: [],
   };
 }
