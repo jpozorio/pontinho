@@ -32,8 +32,8 @@
             [value]="row.name"
             (ionInput)="setName(row.id, $event)"
           ></ion-input>
-          @if (debtOf(row.name) > 0) {
-            <span class="debt" slot="end">deve {{ debtOf(row.name) | currency: 'BRL' }}</span>
+          @if (debtHints().get(row.id); as d) {
+            <span class="debt" slot="end">deve {{ d | currency: 'BRL' }}</span>
           }
           <ion-button fill="clear" color="medium" slot="end" aria-label="Remover jogador" (click)="remove(row.id)">
             ✕

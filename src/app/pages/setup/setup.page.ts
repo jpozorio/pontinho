@@ -19,7 +19,8 @@ import {
 } from '@ionic/angular';
 import { ReentryLimit } from '../../domain/model';
 import { GameStore } from '../../state/game-store';
-import { validatePlayers } from './validate-players';
+import { computeDebts } from '../../domain/money';
+import { canonicalName, validatePlayers } from './validate-players';
 
 interface Row {
   id: number;
@@ -80,14 +81,36 @@ export class SetupPage {
     return text !== '' && Number.isFinite(n) && n > 0 ? n : null;
   });
 
-  private readonly validation = computed(() => validatePlayers(this.rows().map((r) => r.name)));
+  /** Dívida total por jogador conhecido (nome na grafia guardada). */
+  private readonly debtors = computed(() => {
+    const totals = new Map<string, number>();
+    for (const d of computeDebts(this.store.data().finished)) {
+      totals.set(d.debtor, (totals.get(d.debtor) ?? 0) + d.amount);
+    }
+    return totals;
+  });
+
+  /** Dívida a mostrar ao lado de cada linha, por id. */
+  readonly debtHints = computed(() => {
+    const totals = this.debtors();
+    const known = [...totals.keys()];
+    const hints = new Map<number, number>();
+    for (const r of this.rows()) {
+      const amount = totals.get(canonicalName(r.name, known)) ?? 0;
+      if (r.name.trim() !== '' && amount > 0) hints.set(r.id, amount);
+    }
+    return hints;
+  });
+
+  private readonly filled = computed(() => this.rows().filter((r) => r.name.trim() !== ''));
+  private readonly validation = computed(() => validatePlayers(this.filled().map((r) => r.name)));
 
   readonly error = computed(() => {
     const v = this.validation();
     if ('error' in v) {
       if (v.error === 'too-few') return 'Informe pelo menos 2 jogadores';
       if (v.error === 'empty-name') return `Nome vazio na linha ${(v.index ?? 0) + 1}`;
-      return `Nome repetido: ${this.rows()[v.index ?? 0].name.trim()}`;
+      return `Nome repetido: ${this.filled()[v.index ?? 0].name.trim()}`;
     }
     return this.entryValue() === null ? 'Informe o valor da entrada' : null;
   });
@@ -137,12 +160,6 @@ export class SetupPage {
     if (v === 'one' || v === 'unlimited') this.reentryLimit.set(v);
   }
 
-  debtOf(name: string): number {
-    const n = name.trim();
-    if (!n) return 0;
-    return this.store.debtsFor([n]).reduce((s, d) => s + d.amount, 0);
-  }
-
   onAlertDismiss(ev: Event): void {
     this.confirmOpen.set(false);
     if ((ev as CustomEvent<{ role?: string }>).detail?.role === 'confirm') this.store.abandonGame();
@@ -152,7 +169,9 @@ export class SetupPage {
     const v = this.validation();
     const entry = this.entryValue();
     if ('error' in v || entry === null || this.game()) return;
-    this.store.startGame({ entryValue: entry, reentryLimit: this.reentryLimit(), players: v.names });
+    const known = [...this.debtors().keys()];
+    const players = v.names.map((n) => canonicalName(n, known));
+    this.store.startGame({ entryValue: entry, reentryLimit: this.reentryLimit(), players });
     void this.router.navigateByUrl('/jogo/rodada');
   }
 }

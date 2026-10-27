@@ -1,4 +1,14 @@
-import { validatePlayers } from './validate-players';
+import { canonicalName, validatePlayers } from './validate-players';
+
+describe('canonicalName', () => {
+  it('usa a grafia conhecida ignorando maiúsculas e espaços', () => {
+    expect(canonicalName(' ana ', ['Beto', 'Ana'])).toBe('Ana');
+  });
+
+  it('sem correspondência devolve o nome aparado', () => {
+    expect(canonicalName(' Carla ', ['Ana'])).toBe('Carla');
+  });
+});
 
 describe('validatePlayers', () => {
   it('detecta nome repetido sem diferenciar maiúsculas e aponta a linha', () => {
