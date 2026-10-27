@@ -1,6 +1,6 @@
 <ion-header>
   <ion-toolbar>
-    <ion-title>Fim de jogo</ion-title>
+    <ion-title>🏆 Fim de jogo</ion-title>
     <ion-buttons slot="end">
       <ion-button data-caixa (click)="openCaixa()">Caixa</ion-button>
     </ion-buttons>
@@ -9,12 +9,27 @@
 
 <ion-content>
   @if (settlement(); as s) {
+    @for (run of [party()]; track run) {
+      <div class="confetti" slot="fixed" aria-hidden="true">
+        @for (c of confetti; track $index) {
+          <span [style.left.%]="c.left" [style.animation-delay.s]="c.delay" [style.animation-duration.s]="c.duration">{{
+            c.emoji
+          }}</span>
+        }
+      </div>
+    }
+
     <div class="winner">
-      <h2 data-winner>🏆 {{ s.winner }} venceu</h2>
+      <h2 data-winner>
+        @for (run of [party()]; track run) {
+          <span class="trophy">🏆</span>
+        }
+        {{ s.winner }} venceu!
+      </h2>
       <span data-rounds>{{ rounds() }} {{ rounds() === 1 ? 'rodada' : 'rodadas' }}</span>
     </div>
 
-    <div class="split" data-split>
+    <div class="split pp-card" data-split>
       Pote {{ s.pot | currency: 'BRL' }}
       @if (savers().length === 0) {
         — tudo para {{ s.winner }}
@@ -26,39 +41,43 @@
       }
     </div>
 
-    <table class="report">
-      <thead>
-        <tr><th>Jogador</th><th>Pôs</th><th>Recebe</th><th>Saldo</th><th>Na noite</th></tr>
-      </thead>
-      <tbody>
-        @for (r of rows(); track r.player) {
-          <tr [attr.data-row]="r.player">
-            <td>{{ r.player }}</td>
-            <td data-put>{{ r.put | currency: 'BRL' }}</td>
-            <td data-receives>{{ r.receives | currency: 'BRL' }}</td>
-            <td data-balance [class.pos]="r.balance > 0" [class.neg]="r.balance < 0">
-              {{ r.balance | currency: 'BRL' }}
-            </td>
-            <td data-night [class.pos]="(nightBalances().get(r.player) ?? 0) > 0" [class.neg]="(nightBalances().get(r.player) ?? 0) < 0">
-              @let nb = nightBalances().get(r.player) ?? 0;
-              @if (nb < 0) {
-                deve {{ -nb | currency: 'BRL' }}
-              } @else if (nb > 0) {
-                a receber {{ nb | currency: 'BRL' }}
-              } @else {
-                acertado
-              }
-            </td>
-          </tr>
-        }
-      </tbody>
-    </table>
+    <div class="pp-card table-card">
+      <table class="report">
+        <thead>
+          <tr><th>Jogador</th><th>Pôs</th><th>Recebe</th><th>Saldo</th><th>Na noite</th></tr>
+        </thead>
+        <tbody>
+          @for (r of rows(); track r.player) {
+            <tr [attr.data-row]="r.player" [class.champ]="r.player === s.winner">
+              <td>{{ r.player === s.winner ? '👑 ' : '' }}{{ r.player }}</td>
+              <td data-put>{{ r.put | currency: 'BRL' }}</td>
+              <td data-receives>{{ r.receives | currency: 'BRL' }}</td>
+              <td data-balance [class.pos]="r.balance > 0" [class.neg]="r.balance < 0">
+                {{ r.balance | currency: 'BRL' }}
+              </td>
+              <td data-night [class.pos]="(nightBalances().get(r.player) ?? 0) > 0" [class.neg]="(nightBalances().get(r.player) ?? 0) < 0">
+                @let nb = nightBalances().get(r.player) ?? 0;
+                @if (nb < 0) {
+                  deve {{ -nb | currency: 'BRL' }}
+                } @else if (nb > 0) {
+                  a receber {{ nb | currency: 'BRL' }}
+                } @else {
+                  acertado
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
 
     <div class="actions">
-      <ion-button expand="block" fill="outline" color="medium" data-undo (click)="undoLast()">
+      <ion-button expand="block" fill="outline" color="light" data-undo (click)="undoLast()">
         Desfazer última rodada
       </ion-button>
-      <ion-button expand="block" data-new (click)="newGame()">Nova partida com os mesmos jogadores</ion-button>
+      <ion-button expand="block" color="secondary" data-new (click)="newGame()">
+        Nova partida com os mesmos jogadores
+      </ion-button>
     </div>
   }
 </ion-content>

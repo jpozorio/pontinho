@@ -1,33 +1,53 @@
 .winner {
   text-align: center;
-  padding: 16px;
+  padding: 24px 16px 8px;
 
   h2 {
     margin: 0;
+    font-size: clamp(1.6rem, 8vw, 2.2rem);
+    font-weight: 900;
+    line-height: 1.2;
+    color: var(--pp-gold-light);
+    overflow-wrap: anywhere;
+    text-shadow: 0 0 12px rgba(217, 164, 65, 0.85), 0 0 28px rgba(217, 164, 65, 0.5), 0 2px 4px rgba(0, 0, 0, 0.5);
   }
 
-  span {
-    color: var(--ion-color-medium);
+  .trophy {
+    display: inline-block;
+    animation: trophy-bounce 0.9s ease-out 2;
+  }
+
+  span[data-rounds] {
+    display: block;
+    margin-top: 4px;
+    color: var(--pp-on-felt-muted);
   }
 }
 
 .split {
-  margin: 0 12px 12px;
-  padding: 10px 12px;
-  border-radius: 8px;
-  background: var(--ion-color-light);
+  font-weight: 600;
+}
+
+.table-card {
+  padding: 4px 8px;
+  overflow-x: auto;
 }
 
 .report {
-  width: calc(100% - 24px);
-  margin: 0 12px;
+  width: 100%;
   border-collapse: collapse;
+  font-size: 0.85rem;
 
   th,
   td {
     padding: 8px 4px;
     text-align: right;
-    border-bottom: 1px solid var(--ion-color-light-shade);
+    border-bottom: 1px solid #ebe4d2;
+  }
+
+  th {
+    color: var(--pp-muted);
+    font-weight: 700;
   }
 
   th:first-child,
@@ -35,17 +55,87 @@
     text-align: left;
   }
 
+  td:first-child {
+    font-weight: 700;
+  }
+
+  tr:last-child td {
+    border-bottom: 0;
+  }
+
+  .champ td {
+    background: #fbf1d6;
+  }
+
   .pos {
-    color: var(--ion-color-success-shade);
-    font-weight: 600;
+    color: var(--pp-ok);
+    font-weight: 700;
   }
 
   .neg {
-    color: var(--ion-color-danger);
-    font-weight: 600;
+    color: var(--pp-bust);
+    font-weight: 700;
   }
 }
 
 .actions {
-  padding: 12px;
+  padding: 4px 12px 16px;
+}
+
+.confetti {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 10;
+
+  span {
+    position: absolute;
+    top: -2.5rem;
+    font-size: 1.5rem;
+    opacity: 0;
+    animation-name: confetti-fall;
+    animation-timing-function: linear;
+    animation-fill-mode: forwards;
+  }
+}
+
+@keyframes confetti-fall {
+  0% {
+    opacity: 1;
+    transform: translateY(0) rotate(0deg);
+  }
+  85% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(105vh) rotate(540deg);
+  }
+}
+
+@keyframes trophy-bounce {
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+  }
+  30% {
+    transform: translateY(-14px) scale(1.15);
+  }
+  55% {
+    transform: translateY(0) scale(0.95);
+  }
+  75% {
+    transform: translateY(-5px) scale(1.04);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .confetti {
+    display: none;
+  }
+
+  .winner .trophy {
+    animation: none;
+  }
 }

@@ -82,7 +82,7 @@ describe('SettleModal', () => {
     expect(store.night()).toBeNull();
     expect(store.pendings().map((p) => [p.debtor, p.creditor, p.amount])).toEqual([['Carla', 'Ana', 5]]);
     expect(dismiss).toHaveBeenCalled();
-    expect(toast.mock.calls[0][0]!.message).toBe('Noite encerrada');
+    expect(toast.mock.calls[0][0]!.message).toBe('🌙 Noite encerrada');
   });
 
   it('does not close when the confirmation is cancelled', async () => {

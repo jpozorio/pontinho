@@ -1,12 +1,15 @@
 <ion-header>
   <ion-toolbar>
-    <ion-title>Histórico</ion-title>
+    <ion-title>📜 Histórico</ion-title>
   </ion-toolbar>
 </ion-header>
 
 <ion-content [scrollY]="false">
   @if (rounds().length === 0) {
-    <p class="empty">Nenhuma rodada fechada ainda</p>
+    <div class="pp-empty">
+      <span class="big" aria-hidden="true">🃏</span>
+      <p>Nenhuma rodada fechada ainda</p>
+    </div>
   } @else {
     <div class="scroll">
       <table>
@@ -68,7 +71,7 @@
 @if (rounds().length > 0) {
   <ion-footer>
     @if (message(); as msg) {
-      <p class="error" role="alert">{{ msg }}</p>
+      <p class="error pp-error" role="alert">{{ msg }}</p>
     }
     <ion-button expand="block" fill="outline" color="danger" class="undo" data-undo (click)="undoLast()">
       Desfazer última rodada

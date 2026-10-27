@@ -1,7 +1,42 @@
+.hero {
+  padding: 20px 16px 4px;
+  text-align: center;
+
+  h1 {
+    margin: 0;
+    font-size: clamp(1.2rem, 5.6vw, 1.7rem);
+    font-weight: 800;
+    line-height: 1.25;
+    color: #fff;
+    text-wrap: balance;
+    text-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+  }
+
+  .suits {
+    white-space: nowrap;
+  }
+
+  p {
+    margin: 6px 0 0;
+    color: var(--pp-gold-light);
+    font-weight: 600;
+  }
+}
+
 .hint {
   font-size: 0.85rem;
-  color: var(--ion-color-medium);
+  color: var(--pp-muted);
   margin: 0 0 8px;
+}
+
+ion-list {
+  padding: 0;
+  margin-bottom: 8px;
+}
+
+ion-item {
+  --padding-start: 4px;
+  --inner-padding-end: 0;
 }
 
 .hints {
@@ -12,22 +47,23 @@
   white-space: nowrap;
 
   .neg {
-    color: var(--ion-color-danger);
+    color: var(--pp-bust);
   }
 
   .pos {
-    color: var(--ion-color-success-shade);
+    color: var(--pp-ok);
   }
 }
 
-.error {
-  color: var(--ion-color-danger);
-  margin: 8px 0;
+.warning {
+  border-left: 6px solid var(--ion-color-warning);
+
+  p {
+    margin: 0 0 8px;
+  }
 }
 
-.warning {
-  border: 1px solid var(--ion-color-warning);
-  border-radius: 8px;
-  padding: 12px;
-  margin-bottom: 16px;
+.start {
+  margin: 16px 12px calc(16px + env(safe-area-inset-bottom));
+  font-weight: 800;
 }

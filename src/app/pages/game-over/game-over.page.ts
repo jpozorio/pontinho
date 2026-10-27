@@ -1,8 +1,18 @@
 import { CurrencyPipe } from '@angular/common';
-import { Component, computed, inject } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { AlertController, IonButton, IonButtons, IonContent, IonHeader, IonTitle, IonToolbar } from '@ionic/angular';
 import { GameStore } from '../../state/game-store';
+
+const CONFETTI_EMOJIS = ['🎉', '♠️', '♥️', '♣️', '♦️', '🃏', '✨', '🎊'];
+
+/** Chuva de confete: posição, atraso e duração espalhados de forma fixa (sem aleatoriedade). */
+const CONFETTI = Array.from({ length: 24 }, (_, i) => ({
+  emoji: CONFETTI_EMOJIS[i % CONFETTI_EMOJIS.length],
+  left: (i * 37 + 5) % 96,
+  delay: ((i * 7) % 12) / 10,
+  duration: 2.2 + ((i * 3) % 5) * 0.2,
+}));
 
 @Component({
   selector: 'app-game-over',
@@ -16,6 +26,9 @@ export class GameOverPage {
   private readonly alerts = inject(AlertController);
 
   readonly view = this.store.view;
+  readonly confetti = CONFETTI;
+  /** muda a cada entrada na página para recriar (e tocar de novo) o confete */
+  readonly party = signal(0);
   readonly settlement = computed(() => (this.view()?.winner ? (this.store.money()?.settlement ?? null) : null));
   readonly rounds = computed(() => this.view()?.history.length ?? 0);
 
@@ -49,6 +62,7 @@ export class GameOverPage {
   /** A página fica em cache: ao voltar depois de fechar a noite, não há mais o que mostrar. */
   ionViewWillEnter(): void {
     if (!this.settlement()) void this.router.navigateByUrl('/', { replaceUrl: true });
+    this.party.update((n) => n + 1);
   }
 
   async undoLast(): Promise<void> {

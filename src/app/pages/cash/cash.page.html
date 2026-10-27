@@ -5,14 +5,14 @@
         <ion-back-button defaultHref="/" text="" />
       </ion-buttons>
     }
-    <ion-title>Caixa</ion-title>
+    <ion-title>💰 Caixa</ion-title>
   </ion-toolbar>
 </ion-header>
 
 <ion-content>
   @if (cash(); as c) {
-    <div class="top">
-      <span>Dinheiro no caixa <b data-cash>{{ c.cash | currency: 'BRL' }}</b></span>
+    <div class="top pp-card">
+      <span class="amount">💰 <b data-cash>{{ c.cash | currency: 'BRL' }}</b> no caixa</span>
       @if (c.games > 0) {
         <small data-games>{{ c.games === 1 ? '1 partida encerrada na noite' : c.games + ' partidas encerradas na noite' }}</small>
       }
@@ -23,8 +23,8 @@
     }
 
     @if (playing() && money(); as m) {
-      <section data-current>
-        <h2>Partida atual</h2>
+      <section class="pp-card" data-current>
+        <h2 class="pp-title">🃏 Partida atual</h2>
         <p>Pote <b data-pot>{{ m.pot | currency: 'BRL' }}</b></p>
         @if (agreement(); as ag) {
           <p data-agreement>
@@ -39,25 +39,30 @@
           <button type="button" class="link danger" data-remove-agreement (click)="removeAgreement()">remover</button>
         } @else if (canAgree()) {
           <ion-button expand="block" fill="outline" data-agreement-button (click)="openAgreement()">
-            Fazer acordo
+            🤝 Fazer acordo
           </ion-button>
         }
       </section>
     }
 
-    <section>
-      <h2>Jogadores</h2>
+    <section class="pp-card">
+      <h2 class="pp-title">👥 Jogadores</h2>
       @for (r of rows(); track r.player) {
         <div class="mrow" [attr.data-row]="r.player">
           <div class="info">
             <b>{{ r.player }}</b>
-            @if (r.balance < 0) {
-              <span class="debt" data-balance>deve {{ -r.balance | currency: 'BRL' }}</span>
-            } @else if (r.balance > 0) {
-              <span class="credit" data-balance>tem a receber {{ r.balance | currency: 'BRL' }}</span>
-            } @else {
-              <span class="ok" data-balance>acertado</span>
-            }
+            <div class="bal">
+              @if (r.balance < 0) {
+                <span aria-hidden="true">🔴</span>
+                <span class="debt" data-balance>deve {{ -r.balance | currency: 'BRL' }}</span>
+              } @else if (r.balance > 0) {
+                <span aria-hidden="true">🟢</span>
+                <span class="credit" data-balance>tem a receber {{ r.balance | currency: 'BRL' }}</span>
+              } @else {
+                <span aria-hidden="true">✅</span>
+                <span class="ok" data-balance>acertado</span>
+              }
+            </div>
           </div>
           <div class="actions">
             <app-pay-button [player]="r.player" [suggested]="suggested(r)" (failed)="raise($event)" />
@@ -75,15 +80,17 @@
       }
     </section>
 
-    <ion-button expand="block" data-settle-button (click)="openSettle()">Acerto final</ion-button>
+    <ion-button expand="block" color="secondary" class="settle" data-settle-button (click)="openSettle()">
+      🧾 Acerto final
+    </ion-button>
 
     @if (message(); as msg) {
-      <p class="error" role="alert">{{ msg }}</p>
+      <p class="error pp-error" role="alert">{{ msg }}</p>
     }
 
     @if (movements().length) {
-      <section>
-        <h2>Movimentos</h2>
+      <section class="pp-card">
+        <h2 class="pp-title">📝 Movimentos</h2>
         @for (m of movements(); track m.id) {
           <div class="move" data-movement>
             <span data-text>{{ describe(m) }} · {{ m.at | date: 'HH:mm' }}</span>
@@ -95,12 +102,15 @@
       </section>
     }
   } @else {
-    <p class="empty" data-no-night>Nenhuma noite em andamento</p>
+    <div class="pp-empty">
+      <span class="big" aria-hidden="true">🌙</span>
+      <p data-no-night>Nenhuma noite em andamento</p>
+    </div>
   }
 
   @if (pendings().length) {
-    <section data-pendings>
-      <h2>Pendências</h2>
+    <section class="pp-card" data-pendings>
+      <h2 class="pp-title">📌 Pendências</h2>
       @for (p of pendings(); track p.id) {
         <div class="move" data-pending>
           <span data-text>{{ p.debtor }} deve {{ p.amount | currency: 'BRL' }} a {{ p.creditor }} (noite de {{ p.date | date: 'dd/MM' }})</span>

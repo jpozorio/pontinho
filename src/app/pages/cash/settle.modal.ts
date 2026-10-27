@@ -187,7 +187,7 @@ export class SettleModal {
       return;
     }
     await this.modal.dismiss(null, 'closed');
-    const toast = await this.toasts.create({ message: 'Noite encerrada', duration: 2500 });
+    const toast = await this.toasts.create({ message: '🌙 Noite encerrada', duration: 2500 });
     await toast.present();
   }
 

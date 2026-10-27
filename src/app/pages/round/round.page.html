@@ -1,6 +1,6 @@
 <ion-header>
   <ion-toolbar>
-    <ion-title>Rodada {{ view()?.nextRound }}</ion-title>
+    <ion-title>🃏 Rodada {{ view()?.nextRound }}</ion-title>
     <ion-buttons slot="end">
       <ion-button data-abandon (click)="abandon()">Nova partida</ion-button>
     </ion-buttons>
@@ -10,12 +10,17 @@
 <ion-content>
   @if (view(); as v) {
     <div class="bar">
-      <span>baralho: <b>{{ v.dealer }}</b></span>
-      <span>Pote <b>{{ money()?.pot ?? 0 | currency: 'BRL' }}</b></span>
+      <span>🎴 Dá as cartas: <b>{{ v.dealer }}</b></span>
+      <span class="pot">💰 Pote <b>{{ money()?.pot ?? 0 | currency: 'BRL' }}</b></span>
     </div>
 
     @for (r of rows(); track r.p.name) {
-      <div class="pcard" [class.grey]="r.grey" [attr.data-row]="r.p.name">
+      <div
+        class="pcard"
+        [class.grey]="r.grey"
+        [class.busting]="r.p.playsNextRound && r.level === 'bust'"
+        [attr.data-row]="r.p.name"
+      >
         <div class="nm">
           <b>{{ r.p.name }}</b>
           @if (r.p.playsNextRound) {
@@ -74,7 +79,7 @@
             @if (r.left === null || r.left < 0) {
               <b>💥</b>estourou
             } @else {
-              <b>{{ r.left }}</b>faltam
+              <b>{{ r.left }}</b>faltam{{ r.level === 'near' ? ' 🔥' : '' }}
             }
           </div>
         }
@@ -82,8 +87,8 @@
     }
 
     @if (errorMessage(); as msg) {
-      <p class="error" role="alert">{{ msg }}</p>
+      <p class="error pp-error" role="alert">{{ msg }}</p>
     }
-    <ion-button expand="block" class="close" data-close (click)="close()">Fechar rodada</ion-button>
+    <ion-button expand="block" color="secondary" class="close" data-close (click)="close()">Fechar rodada</ion-button>
   }
 </ion-content>
