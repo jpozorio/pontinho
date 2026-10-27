@@ -1,5 +1,5 @@
 import { computeGame } from './engine';
-import { BUST_AT, Decision, Game, Round, Score } from './model';
+import { Decision, Game, Round, Score } from './model';
 
 export type ActionError =
   | 'invalid-score'
@@ -35,12 +35,11 @@ export function closeRound(game: Game, now: Date = new Date()): Result {
   if (playing.some((p) => game.draft[p.name] === undefined)) return { error: 'missing-scores' };
 
   const scores: Record<string, Score> = {};
-  const busted = new Set<string>();
-  for (const p of playing) {
-    const s = game.draft[p.name];
-    scores[p.name] = s;
-    if (s === 'bust' || p.total + s >= BUST_AT) busted.add(p.name);
-  }
+  for (const p of playing) scores[p.name] = game.draft[p.name];
+
+  const candidate: Game = { ...game, rounds: [...game.rounds, { scores, decisions: {} }], draft: {} };
+  const cells = computeGame(candidate).history[game.rounds.length];
+  const busted = new Set(game.config.players.filter((n, i) => Object.hasOwn(scores, n) && cells[i].busted));
   if (busted.size === playing.length) return { error: 'all-bust' };
 
   const decisions: Record<string, Decision> = {};
@@ -50,7 +49,7 @@ export function closeRound(game: Game, now: Date = new Date()): Result {
     if (busted.has(p.name) && !canReenter) decisions[p.name] = 'out';
   }
 
-  const next: Game = { ...game, rounds: [...game.rounds, { scores, decisions }], draft: {} };
+  const next: Game = { ...candidate, rounds: [...game.rounds, { scores, decisions }] };
   if (computeGame(next).winner !== null) next.finishedAt = now.toISOString();
   return { game: next };
 }
@@ -71,7 +70,7 @@ export function decide(game: Game, player: string, decision: Decision): Result {
   );
   const draft = { ...game.draft };
   if (decision === 'out') delete draft[player];
-  return { game: { ...game, rounds, draft } };
+  return { game: dropStaleAgreement({ ...game, rounds, draft }) };
 }
 
 export function editRound(game: Game, index: number, scores: Record<string, Score>): Result {
@@ -80,7 +79,7 @@ export function editRound(game: Game, index: number, scores: Record<string, Scor
   if (Object.values(scores).some((s) => !validScore(s))) return { error: 'invalid-score' };
   const expected = Object.keys(original.scores);
   const given = Object.keys(scores);
-  if (given.length !== expected.length || expected.some((n) => !(n in scores))) {
+  if (given.length !== expected.length || expected.some((n) => !Object.hasOwn(scores, n))) {
     return { error: 'missing-scores' };
   }
 
@@ -97,9 +96,15 @@ export function editRound(game: Game, index: number, scores: Record<string, Scor
   return { game: edited };
 }
 
+/** O acordo só vale com exatamente dois jogadores; com mais, é removido. */
+function dropStaleAgreement(game: Game): Game {
+  if (!game.agreement || computeGame(game).playingCount <= 2) return game;
+  const { agreement: _removed, ...rest } = game;
+  return rest;
+}
+
 export function truncateFrom(game: Game, index: number): Game {
-  const next: Game = { ...game, rounds: game.rounds.slice(0, Math.max(0, index)), draft: {} };
-  delete next.finishedAt;
-  if (next.agreement && computeGame(next).playingCount > 2) delete next.agreement;
-  return next;
+  if (index < 0 || index >= game.rounds.length) return game;
+  const { finishedAt: _finished, ...rest } = game;
+  return dropStaleAgreement({ ...rest, rounds: game.rounds.slice(0, index), draft: {} });
 }

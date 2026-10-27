@@ -147,4 +147,22 @@ describe('actions', () => {
     const g: Game = { ...game(rounds), agreement: { saves: { Ana: 1, Beto: 1 } } };
     expect(truncateFrom(g, 1).agreement).toBeDefined();
   });
+
+  it('truncateFrom out of range returns the game unchanged', () => {
+    const g0 = ok(closeRound(game([], { Ana: 10, Beto: 'bust', Carla: 100 })));
+    expect(truncateFrom(g0, 1)).toBe(g0);
+    expect(truncateFrom(g0, -1)).toBe(g0);
+    expect(g0.finishedAt).toBeDefined();
+  });
+
+  it('decide reenter drops the agreement when a third player returns', () => {
+    const rounds = [
+      round({ Ana: 40, Beto: 30, Carla: 20, Davi: 'bust' }, { Davi: 'out' }),
+      round({ Ana: 10, Beto: 10, Carla: 'bust' }, { Carla: 'out' }),
+    ];
+    const g: Game = { ...game(rounds, {}, four), agreement: { saves: { Ana: 10, Beto: 10 } } };
+    expect(computeGame(g).playingCount).toBe(2);
+    expect(ok(decide(g, 'Carla', 'reenter')).agreement).toBeUndefined();
+    expect(ok(decide(g, 'Carla', 'out')).agreement).toBeDefined();
+  });
 });
