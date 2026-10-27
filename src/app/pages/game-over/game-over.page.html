@@ -1,0 +1,72 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Fim de jogo</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  @if (settlement(); as s) {
+    <div class="winner">
+      <h2 data-winner>🏆 {{ s.winner }} venceu</h2>
+      <span data-rounds>{{ rounds() }} {{ rounds() === 1 ? 'rodada' : 'rodadas' }}</span>
+    </div>
+
+    <div class="split" data-split>
+      Pote {{ s.pot | currency: 'BRL' }}
+      @if (savers().length === 0) {
+        — tudo para {{ s.winner }}
+      } @else {
+        @for (e of savers(); track e[0]) {
+          · {{ e[0] }} salvou {{ e[1] | currency: 'BRL' }}
+        }
+        · resto {{ rest() | currency: 'BRL' }} para {{ s.winner }}
+      }
+    </div>
+
+    <table class="report">
+      <thead>
+        <tr><th>Jogador</th><th>Pôs</th><th>Recebe</th><th>Saldo</th></tr>
+      </thead>
+      <tbody>
+        @for (r of rows(); track r.player) {
+          <tr [attr.data-row]="r.player">
+            <td>{{ r.player }}</td>
+            <td data-put>{{ r.put | currency: 'BRL' }}</td>
+            <td data-receives>{{ r.receives | currency: 'BRL' }}</td>
+            <td data-balance [class.pos]="r.balance > 0" [class.neg]="r.balance < 0">
+              {{ r.balance | currency: 'BRL' }}
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+
+    @if (owing().length > 0) {
+      <section class="owing" data-owing>
+        <h3>Ainda falta pagar</h3>
+        @for (r of owing(); track r.player) {
+          <div class="orow" [attr.data-owing-row]="r.player">
+            <div class="info">
+              <b>{{ r.player }}</b>
+              @if (r.outstanding > 0) {
+                <span>deve {{ r.outstanding | currency: 'BRL' }} desta partida</span>
+              }
+              @for (d of r.oldDebts; track d.gameId) {
+                <span>deve {{ d.amount | currency: 'BRL' }} ao {{ d.creditor }} (partida de {{ d.date | date: 'dd/MM' }})</span>
+              }
+            </div>
+            <app-pay-button [player]="r.player" [suggested]="suggested(r)" />
+          </div>
+        }
+        <p class="note">O que não for pago fica como dívida com {{ s.winner }}</p>
+      </section>
+    }
+
+    <div class="actions">
+      <ion-button expand="block" fill="outline" color="medium" data-undo (click)="undoLast()">
+        Desfazer última rodada
+      </ion-button>
+      <ion-button expand="block" data-new (click)="newGame()">Nova partida com os mesmos jogadores</ion-button>
+    </div>
+  }
+</ion-content>

@@ -9,7 +9,7 @@ import {
   IonToolbar,
   ModalController,
 } from '@ionic/angular';
-import { AgreementError, MoneyRow } from '../../domain/money';
+import { AgreementError, MoneyRow, suggestedPayment } from '../../domain/money';
 import { Payment } from '../../domain/model';
 import { PayButton } from '../../shared/pay-button';
 import { GameStore } from '../../state/game-store';
@@ -71,7 +71,7 @@ export class MoneyPage {
   }
 
   suggested(r: MoneyRow): number {
-    return round2(r.outstanding + r.oldDebts.reduce((a, d) => a + d.amount, 0));
+    return suggestedPayment(r);
   }
 
   credit(r: MoneyRow): number {

@@ -158,3 +158,8 @@ export function clearAgreement(game: Game): Game {
   const { agreement: _removed, ...rest } = game;
   return rest;
 }
+
+/** Valor sugerido no "+ pagou": o que falta da partida atual mais as dívidas antigas abertas. */
+export function suggestedPayment(r: MoneyRow): number {
+  return cents(r.outstanding + r.oldDebts.reduce((a, d) => a + d.amount, 0));
+}

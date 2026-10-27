@@ -1,0 +1,86 @@
+.winner {
+  text-align: center;
+  padding: 16px;
+
+  h2 {
+    margin: 0;
+  }
+
+  span {
+    color: var(--ion-color-medium);
+  }
+}
+
+.split {
+  margin: 0 12px 12px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: var(--ion-color-light);
+}
+
+.report {
+  width: calc(100% - 24px);
+  margin: 0 12px;
+  border-collapse: collapse;
+
+  th,
+  td {
+    padding: 8px 4px;
+    text-align: right;
+    border-bottom: 1px solid var(--ion-color-light-shade);
+  }
+
+  th:first-child,
+  td:first-child {
+    text-align: left;
+  }
+
+  .pos {
+    color: var(--ion-color-success-shade);
+    font-weight: 600;
+  }
+
+  .neg {
+    color: var(--ion-color-danger);
+    font-weight: 600;
+  }
+}
+
+.owing {
+  padding: 12px;
+
+  h3 {
+    margin: 0 0 8px;
+  }
+
+  .orow {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 0;
+  }
+
+  .info {
+    flex: 1;
+    min-width: 0;
+
+    b,
+    span {
+      display: block;
+    }
+
+    span {
+      font-size: 0.85rem;
+      color: var(--ion-color-danger);
+    }
+  }
+
+  .note {
+    font-size: 0.85rem;
+    color: var(--ion-color-medium);
+  }
+}
+
+.actions {
+  padding: 12px;
+}
