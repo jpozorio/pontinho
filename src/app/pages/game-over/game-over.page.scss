@@ -46,41 +46,6 @@
   }
 }
 
-.owing {
-  padding: 12px;
-
-  h3 {
-    margin: 0 0 8px;
-  }
-
-  .orow {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 6px 0;
-  }
-
-  .info {
-    flex: 1;
-    min-width: 0;
-
-    b,
-    span {
-      display: block;
-    }
-
-    span {
-      font-size: 0.85rem;
-      color: var(--ion-color-danger);
-    }
-  }
-
-  .note {
-    font-size: 0.85rem;
-    color: var(--ion-color-medium);
-  }
-}
-
 .actions {
   padding: 12px;
 }

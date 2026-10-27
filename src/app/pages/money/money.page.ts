@@ -1,4 +1,4 @@
-import { CurrencyPipe, DatePipe } from '@angular/common';
+import { CurrencyPipe } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
 import {
   AlertController,
@@ -9,8 +9,8 @@ import {
   IonToolbar,
   ModalController,
 } from '@ionic/angular';
-import { AgreementError, MoneyRow, suggestedPayment } from '../../domain/money';
-import { Payment } from '../../domain/model';
+import { CashRow } from '../../domain/cash';
+import { AgreementError } from '../../domain/money';
 import { PayButton } from '../../shared/pay-button';
 import { GameStore } from '../../state/game-store';
 import { AgreementModal } from './agreement.modal';
@@ -21,11 +21,9 @@ const AGREEMENT_MESSAGES: Record<AgreementError, string> = {
   'exceeds-pot': 'O acordo passa do valor do pote',
 };
 
-const round2 = (x: number): number => Math.round(x * 100) / 100;
-
 @Component({
   selector: 'app-money',
-  imports: [CurrencyPipe, DatePipe, IonButton, IonContent, IonHeader, IonTitle, IonToolbar, PayButton],
+  imports: [CurrencyPipe, IonButton, IonContent, IonHeader, IonTitle, IonToolbar, PayButton],
   templateUrl: './money.page.html',
   styleUrl: './money.page.scss',
 })
@@ -36,13 +34,14 @@ export class MoneyPage {
 
   readonly money = this.store.money;
   readonly game = this.store.game;
-  /** erro de acordo, preso à lista de pagamentos do momento: qualquer pagamento novo/removido o apaga */
-  private readonly raised = signal<{ text: string; payments: unknown } | null>(null);
+  /** saldo da noite de cada jogador */
+  readonly rows = computed(() => this.store.cash()?.rows ?? []);
+  /** erro de acordo, preso aos movimentos do momento: qualquer pagamento novo/removido o apaga */
+  private readonly raised = signal<{ text: string; movements: unknown } | null>(null);
   readonly message = computed(() => {
     const r = this.raised();
-    return r && r.payments === this.game()?.payments ? r.text : null;
+    return r && r.movements === this.store.night()?.movements ? r.text : null;
   });
-  private readonly expanded = signal<ReadonlySet<string>>(new Set());
 
   readonly canAgree = computed(() => {
     const v = this.store.view();
@@ -54,36 +53,9 @@ export class MoneyPage {
     return saves ? Object.entries(saves).map(([name, amount]) => ({ name, amount })) : null;
   });
 
-  payments(player: string): Payment[] {
-    return (this.game()?.payments ?? []).filter((p) => p.player === player);
-  }
-
-  isOpen(player: string): boolean {
-    return this.expanded().has(player);
-  }
-
-  toggle(player: string): void {
-    this.expanded.update((s) => {
-      const next = new Set(s);
-      if (!next.delete(player)) next.add(player);
-      return next;
-    });
-  }
-
-  suggested(r: MoneyRow): number {
-    return suggestedPayment(r);
-  }
-
-  credit(r: MoneyRow): number {
-    return round2(r.paidInGame - r.owes);
-  }
-
-  settled(r: MoneyRow): boolean {
-    return r.outstanding === 0 && r.oldDebts.length === 0;
-  }
-
-  async removePayment(id: string): Promise<void> {
-    if (await this.confirm('Remover este pagamento?', 'Remover')) this.store.removePayment(id);
+  /** Valor sugerido no "+ pagou": o que o jogador deve na noite. */
+  suggested(r: CashRow): number {
+    return r.balance < 0 ? -r.balance : 0;
   }
 
   async openAgreement(): Promise<void> {
@@ -104,7 +76,10 @@ export class MoneyPage {
     if (res.role !== 'save' || !res.data) return;
     if (this.store.setAgreement(res.data)) return;
     const e = this.store.lastError() as AgreementError | null;
-    this.raised.set({ text: (e && AGREEMENT_MESSAGES[e]) ?? 'Valor inválido', payments: g.payments });
+    this.raised.set({
+      text: (e && AGREEMENT_MESSAGES[e]) ?? 'Valor inválido',
+      movements: this.store.night()?.movements,
+    });
   }
 
   async removeAgreement(): Promise<void> {

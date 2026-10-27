@@ -99,6 +99,19 @@ describe('SetupPage', () => {
     expect(alert.getAttribute('message')).toBe('Os pontos e pagamentos desta partida serão descartados.');
   });
 
+  it('shows pending debts next to the debtor and canonicalizes names against the night and pendings', () => {
+    const store = configure();
+    playAndArchive(store, { entryValue: 5, reentryLimit: 'unlimited', players: ['Ana', 'Beto'] }, 'Ana');
+    expect(store.closeNight()).toBe(true);
+    playAndArchive(store, { entryValue: 5, reentryLimit: 'unlimited', players: ['Carla', 'Davi'] }, 'Carla');
+    const fixture = TestBed.createComponent(SetupPage);
+    const page = fixture.componentInstance;
+    page.rows.set([{ id: 1, name: ' beto' }, { id: 2, name: 'ana' }, { id: 3, name: 'davi ' }]);
+    expect([...page.debtHints()]).toEqual([[1, 5]]);
+    page.start();
+    expect(store.game()!.config.players).toEqual(['Beto', 'Ana', 'Davi']);
+  });
+
   it('accepts only plain decimal entry values, rounded to cents', () => {
     configure();
     const page = TestBed.createComponent(SetupPage).componentInstance;

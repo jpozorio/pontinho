@@ -20,7 +20,6 @@ import {
 import { ReentryLimit } from '../../domain/model';
 import { parseAmount } from '../../shared/parse-amount';
 import { GameStore } from '../../state/game-store';
-import { computeDebts } from '../../domain/money';
 import { canonicalName, validatePlayers } from './validate-players';
 
 interface Row {
@@ -78,19 +77,27 @@ export class SetupPage {
 
   readonly entryValue = computed(() => parseAmount(this.entryText()));
 
-  /** Dívida total por jogador conhecido (nome na grafia guardada). */
+  /** Pendência total por devedor (nome na grafia guardada). */
   private readonly debtors = computed(() => {
     const totals = new Map<string, number>();
-    for (const d of computeDebts(this.store.data().finished)) {
-      totals.set(d.debtor, (totals.get(d.debtor) ?? 0) + d.amount);
+    for (const p of this.store.pendings()) {
+      totals.set(p.debtor, (totals.get(p.debtor) ?? 0) + p.amount);
     }
     return totals;
+  });
+
+  /** Nomes já conhecidos: pendências (devedores e credores) e jogadores da noite. */
+  private readonly known = computed(() => {
+    const names = new Set<string>();
+    for (const p of this.store.pendings()) names.add(p.debtor).add(p.creditor);
+    for (const r of this.store.cash()?.rows ?? []) names.add(r.player);
+    return [...names];
   });
 
   /** Dívida a mostrar ao lado de cada linha, por id. */
   readonly debtHints = computed(() => {
     const totals = this.debtors();
-    const known = [...totals.keys()];
+    const known = this.known();
     const hints = new Map<number, number>();
     for (const r of this.rows()) {
       const amount = totals.get(canonicalName(r.name, known)) ?? 0;
@@ -172,7 +179,7 @@ export class SetupPage {
     const v = this.validation();
     const entry = this.entryValue();
     if ('error' in v || entry === null || this.game()) return;
-    const known = [...this.debtors().keys()];
+    const known = this.known();
     const players = v.names.map((n) => canonicalName(n, known));
     this.store.startGame({ entryValue: entry, reentryLimit: this.reentryLimit(), players });
     void this.router.navigateByUrl('/jogo/rodada');

@@ -41,27 +41,6 @@
       </tbody>
     </table>
 
-    @if (owing().length > 0) {
-      <section class="owing" data-owing>
-        <h3>Ainda falta pagar</h3>
-        @for (r of owing(); track r.player) {
-          <div class="orow" [attr.data-owing-row]="r.player">
-            <div class="info">
-              <b>{{ r.player }}</b>
-              @if (r.outstanding > 0) {
-                <span>deve {{ r.outstanding | currency: 'BRL' }} desta partida</span>
-              }
-              @for (d of r.oldDebts; track d.gameId) {
-                <span>deve {{ d.amount | currency: 'BRL' }} ao {{ d.creditor }} (partida de {{ d.date | date: 'dd/MM' }})</span>
-              }
-            </div>
-            <app-pay-button [player]="r.player" [suggested]="suggested(r)" />
-          </div>
-        }
-        <p class="note">O que não for pago fica como dívida com {{ s.winner }}</p>
-      </section>
-    }
-
     <div class="actions">
       <ion-button expand="block" fill="outline" color="medium" data-undo (click)="undoLast()">
         Desfazer última rodada

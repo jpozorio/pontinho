@@ -8,47 +8,23 @@
   @if (money(); as m) {
     <div class="bar">
       <span>Pote <b data-pot>{{ m.pot | currency: 'BRL' }}</b></span>
-      <span data-missing>Falta entrar no pote: <b>{{ m.missingToPot | currency: 'BRL' }}</b></span>
     </div>
 
-    @for (r of m.rows; track r.player) {
+    @for (r of rows(); track r.player) {
       <div class="mrow" [attr.data-row]="r.player">
         <div class="top">
           <div class="info">
             <b>{{ r.player }}</b>
-            <span>
-              {{ r.entries }} {{ r.entries === 1 ? 'entrada' : 'entradas' }} · deve {{ r.owes | currency: 'BRL' }} ·
-              pagou {{ r.paidInGame | currency: 'BRL' }}
-            </span>
-            @for (d of r.oldDebts; track d.gameId) {
-              <span class="debt" data-debt>
-                deve {{ d.amount | currency: 'BRL' }} ao {{ d.creditor }} (partida de {{ d.date | date: 'dd/MM' }})
-              </span>
-            }
-            @if (credit(r) > 0) {
-              <span class="credit" data-credit>crédito {{ credit(r) | currency: 'BRL' }}</span>
+            @if (r.balance < 0) {
+              <span class="debt" data-balance>deve {{ -r.balance | currency: 'BRL' }}</span>
+            } @else if (r.balance > 0) {
+              <span class="credit" data-balance>tem a receber {{ r.balance | currency: 'BRL' }}</span>
+            } @else {
+              <span class="ok" data-balance>acertado</span>
             }
           </div>
-          @if (settled(r)) {
-            <span class="ok" data-ok>ok</span>
-          }
           <app-pay-button [player]="r.player" [suggested]="suggested(r)" />
         </div>
-        @if (payments(r.player).length > 0) {
-          <button type="button" class="link" data-toggle (click)="toggle(r.player)">
-            {{ isOpen(r.player) ? 'ocultar' : 'ver' }} pagamentos ({{ payments(r.player).length }})
-          </button>
-          @if (isOpen(r.player)) {
-            <ul class="pays">
-              @for (p of payments(r.player); track p.id) {
-                <li data-payment>
-                  <span>{{ p.at | date: 'dd/MM HH:mm' }} · {{ p.amount | currency: 'BRL' }}</span>
-                  <button type="button" class="link danger" data-remove (click)="removePayment(p.id)">remover</button>
-                </li>
-              }
-            </ul>
-          }
-        }
       </div>
     }
 

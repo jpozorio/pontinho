@@ -64,57 +64,11 @@ describe('GameOverPage', () => {
     expect(el.querySelector('[data-split]')!.textContent).toContain('tudo para Davi');
   });
 
-  it('lists who still owes and hides the section when nobody does', () => {
-    const { store, fixture, el } = setup();
-    expect(el.querySelector('[data-owing-row="Ana"] [data-pay]')).not.toBeNull();
-    expect(el.querySelector('[data-owing]')!.textContent).toContain('fica como dívida com Davi');
-    for (const r of store.money()!.rows) {
-      if (r.outstanding > 0) store.addPayment(r.player, r.outstanding);
-    }
-    fixture.detectChanges();
-    expect(el.querySelector('[data-owing]')).toBeNull();
-  });
-
-  it('does not list the winner as owing their own entry', () => {
-    const { store, el } = setup();
-    expect(store.money()!.rows.find((r) => r.player === 'Davi')!.outstanding).toBe(10);
-    expect(el.querySelector('[data-owing-row="Davi"]')).toBeNull();
-    expect(el.querySelector('[data-owing-row="Ana"]')).not.toBeNull();
-  });
-
-  it('still lists old debts of the winner, without the current-game entry', () => {
-    localStorage.clear();
-    TestBed.resetTestingModule();
-    TestBed.configureTestingModule({
-      providers: [
-        { provide: LOCALE_ID, useValue: 'pt-BR' },
-        provideIonicAngular({ mode: 'md', useSetInputAPI: true }),
-        provideRouter([]),
-      ],
-    });
-    const store = TestBed.inject(GameStore);
-    const play = (winner: string, loser: string) => {
-      store.startGame({ entryValue: 10, reentryLimit: 'unlimited', players: ['Ana', 'Davi'] });
-      store.setDraftScore(winner, 5);
-      store.setDraftScore(loser, 'bust');
-      expect(store.closeRound()).toBe(true);
-    };
-    play('Ana', 'Davi');
-    expect(store.archiveFinished()).toBe(true);
-    play('Davi', 'Ana');
-    const fixture = TestBed.createComponent(GameOverPage);
-    fixture.detectChanges();
-    const el = fixture.nativeElement as HTMLElement;
-    const davi = el.querySelector('[data-owing-row="Davi"]')!.textContent!;
-    expect(davi).toContain('ao Ana');
-    expect(davi).not.toContain('desta partida');
-  });
-
   it('new game archives, clears current and navigates to /novo', async () => {
     const { store, fixture, nav } = setup();
     await fixture.componentInstance.newGame();
     expect(store.game()).toBeNull();
-    expect(store.data().finished.length).toBe(1);
+    expect(store.night()!.games.length).toBe(1);
     expect(nav).toHaveBeenCalledWith('/novo');
   });
 

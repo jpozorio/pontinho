@@ -3,7 +3,7 @@ import { AlertController, IonButton } from '@ionic/angular';
 import { GameStore } from '../state/game-store';
 import { parseAmount } from './parse-amount';
 
-/** Botão "+ pagou": pede o valor (aceita vírgula) e registra o pagamento na hora. */
+/** Botão "+ pagou": pede o valor (aceita vírgula) e lança jogador → caixa na hora. */
 @Component({
   selector: 'app-pay-button',
   imports: [IonButton],
@@ -38,6 +38,6 @@ export class PayButton {
     const res = await alert.onDidDismiss<{ values?: { amount?: string | number } }>();
     if (res.role !== 'confirm') return;
     const amount = parseAmount(res.data?.values?.amount);
-    if (amount !== null) this.store.addPayment(this.player(), amount);
+    if (amount !== null) this.store.payIn(this.player(), amount);
   }
 }

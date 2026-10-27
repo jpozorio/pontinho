@@ -111,7 +111,7 @@ describe('RoundPage', () => {
     create.mockResolvedValue(fake('confirm') as never);
     await fixture.componentInstance.abandon();
     expect(store.game()).toBeNull();
-    expect(store.data().finished.length).toBe(0);
+    expect(store.night()!.games.length).toBe(0);
     expect(nav).toHaveBeenCalledWith('/novo');
   });
 
@@ -170,6 +170,22 @@ describe('RoundPage', () => {
       expect(create.mock.calls[2][0]).toMatchObject({ header: 'Ana estourou na rodada 1. Mudar para: reentra com 20?' });
       expect(store.view()!.players[0].decision).toBe('reenter');
     });
+  });
+
+  it('registers "Pagou agora?" after a reentry as a payment to the night cash', async () => {
+    const { store, fixture } = setup();
+    for (const [p, v] of [['Ana', 'bust'], ['Beto', 10], ['Carla', 10]] as const) store.setDraftScore(p, v);
+    const answer = (role: string, amount?: string) => ({
+      present: () => Promise.resolve(),
+      onDidDismiss: () => Promise.resolve({ role, data: { values: { amount } } }),
+    });
+    vi.spyOn(TestBed.inject(AlertController), 'create')
+      .mockResolvedValueOnce(answer('reenter') as never)
+      .mockResolvedValueOnce(answer('confirm', '5') as never);
+    await fixture.componentInstance.close();
+    expect(store.view()!.players[0].decision).toBe('reenter');
+    expect(store.night()!.movements).toMatchObject([{ kind: 'in', player: 'Ana', amount: 5 }]);
+    expect(store.cash()!.cash).toBe(5);
   });
 
   it('says the game is over when closing a finished game', async () => {

@@ -3,7 +3,7 @@ import localePt from '@angular/common/locales/pt';
 import { LOCALE_ID } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
-import { AlertController, ModalController, provideIonicAngular } from '@ionic/angular';
+import { ModalController, provideIonicAngular } from '@ionic/angular';
 import { GameStore } from '../../state/game-store';
 import { AgreementModal } from './agreement.modal';
 import { MoneyPage } from './money.page';
@@ -48,38 +48,20 @@ describe('MoneyPage', () => {
     expect(el.querySelector('[data-agreement-button]')).not.toBeNull();
   });
 
-  it('shows ok on the row after the player pays in full', () => {
+  it('shows the pot and each player\'s night balance', () => {
     const { store, fixture, el } = setup(['Ana', 'Beto', 'Carla']);
-    expect(el.querySelector('[data-row="Beto"] [data-ok]')).toBeNull();
-    store.addPayment('Beto', 5);
-    fixture.detectChanges();
-    expect(el.querySelector('[data-row="Beto"] [data-ok]')).not.toBeNull();
-    expect(el.querySelector('[data-row="Ana"] [data-ok]')).toBeNull();
-  });
-
-  it('shows pot, missing and credit on overpayment', () => {
-    const { store, fixture, el } = setup(['Ana', 'Beto', 'Carla']);
+    const balance = () => el.querySelector('[data-row="Beto"] [data-balance]')!.textContent!.replace(/\s+/g, ' ');
     expect(el.querySelector('[data-pot]')!.textContent).toContain('15,00');
-    store.addPayment('Beto', 8);
+    expect(balance()).toContain('deve R$ 5,00');
+    store.payIn('Beto', 5);
     fixture.detectChanges();
-    expect(el.querySelector('[data-missing]')!.textContent).toContain('10,00');
-    expect(el.querySelector('[data-row="Beto"] [data-credit]')!.textContent).toContain('3,00');
-  });
-
-  it('removes a payment only after confirmation', async () => {
-    const { store, fixture, el } = setup(['Ana', 'Beto', 'Carla']);
-    store.addPayment('Beto', 5);
+    expect(balance()).toContain('acertado');
+    store.payIn('Beto', 3);
     fixture.detectChanges();
-    (el.querySelector('[data-row="Beto"] [data-toggle]') as HTMLElement).click();
-    fixture.detectChanges();
-    expect(el.querySelectorAll('[data-payment]').length).toBe(1);
-    const spy = vi.spyOn(TestBed.inject(AlertController), 'create').mockResolvedValue(fake('cancel') as never);
-    const id = store.game()!.payments[0].id;
-    await fixture.componentInstance.removePayment(id);
-    expect(store.game()!.payments.length).toBe(1);
-    spy.mockResolvedValue(fake('confirm') as never);
-    await fixture.componentInstance.removePayment(id);
-    expect(store.game()!.payments.length).toBe(0);
+    expect(balance()).toContain('tem a receber R$ 3,00');
+    expect(el.querySelector('[data-row="Ana"] [data-balance]')!.textContent!.replace(/\s+/g, ' ')).toContain(
+      'deve R$ 5,00',
+    );
   });
 
   it('saves an agreement and maps errors to Portuguese', async () => {
@@ -104,8 +86,8 @@ describe('MoneyPage', () => {
   });
 });
 
-describe('MoneyPage debts', () => {
-  function withDebt() {
+describe('MoneyPage night', () => {
+  it('suggests what the player owes in the night, across games, and 0 when settled', () => {
     const { store } = setup(['Ana', 'Beto', 'Carla']);
     store.setDraftScore('Ana', 'bust');
     store.setDraftScore('Beto', 'bust');
@@ -115,34 +97,11 @@ describe('MoneyPage debts', () => {
     store.startGame({ entryValue: 5, reentryLimit: 'unlimited', players: ['Carla', 'Ana', 'Beto'] });
     const fixture = TestBed.createComponent(MoneyPage);
     fixture.detectChanges();
-    return { store, fixture, el: fixture.nativeElement as HTMLElement };
-  }
-
-  it('shows an old debt with creditor and date, not ok until debt and entry are paid', () => {
-    const { store, fixture, el } = withDebt();
-    const row = () => el.querySelector('[data-row="Ana"]')!;
-    const d = new Date(store.data().finished[0].startedAt);
-    const dd = `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}`;
-    expect(row().querySelector('[data-debt]')!.textContent!.replace(/\s+/g, ' ')).toContain(
-      `deve R$ 5,00 ao Carla (partida de ${dd})`,
-    );
-    expect(row().querySelector('[data-ok]')).toBeNull();
-    expect(fixture.componentInstance.suggested(store.money()!.rows.find((r) => r.player === 'Ana')!)).toBe(10);
-    store.addPayment('Ana', 5);
-    fixture.detectChanges();
-    expect(row().querySelector('[data-debt]')).toBeNull();
-    expect(row().querySelector('[data-ok]')).toBeNull();
-    store.addPayment('Ana', 5);
-    fixture.detectChanges();
-    expect(row().querySelector('[data-ok]')).not.toBeNull();
-  });
-
-  it('suggests only the entry when there is no old debt, and 0 when settled', () => {
-    const { store, fixture } = setup(['Ana', 'Beto', 'Carla']);
-    const ana = () => store.money()!.rows.find((r) => r.player === 'Ana')!;
-    expect(fixture.componentInstance.suggested(ana())).toBe(5);
-    store.addPayment('Ana', 5);
-    expect(fixture.componentInstance.suggested(ana())).toBe(0);
+    const row = (p: string) => store.cash()!.rows.find((r) => r.player === p)!;
+    expect(fixture.componentInstance.suggested(row('Ana'))).toBe(10);
+    expect(fixture.componentInstance.suggested(row('Carla'))).toBe(0);
+    store.payIn('Ana', 10);
+    expect(fixture.componentInstance.suggested(row('Ana'))).toBe(0);
   });
 
   it('clears a stale agreement error after a payment, and cancel saves nothing', async () => {
@@ -157,7 +116,7 @@ describe('MoneyPage debts', () => {
     await fixture.componentInstance.openAgreement();
     fixture.detectChanges();
     expect(el.querySelector('.error')).not.toBeNull();
-    store.addPayment('Beto', 1);
+    store.payIn('Beto', 1);
     fixture.detectChanges();
     expect(el.querySelector('.error')).toBeNull();
   });

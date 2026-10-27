@@ -1,14 +1,12 @@
-import { CurrencyPipe, DatePipe } from '@angular/common';
+import { CurrencyPipe } from '@angular/common';
 import { Component, computed, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { AlertController, IonButton, IonContent, IonHeader, IonTitle, IonToolbar } from '@ionic/angular';
-import { MoneyRow, suggestedPayment } from '../../domain/money';
-import { PayButton } from '../../shared/pay-button';
 import { GameStore } from '../../state/game-store';
 
 @Component({
   selector: 'app-game-over',
-  imports: [CurrencyPipe, DatePipe, IonButton, IonContent, IonHeader, IonTitle, IonToolbar, PayButton],
+  imports: [CurrencyPipe, IonButton, IonContent, IonHeader, IonTitle, IonToolbar],
   templateUrl: './game-over.page.html',
   styleUrl: './game-over.page.scss',
 })
@@ -41,20 +39,8 @@ export class GameOverPage {
     return Math.round((s.pot - this.savers().reduce((a, [, v]) => a + v, 0)) * 100) / 100;
   });
 
-  /** quem ainda deve; a entrada do próprio vencedor não é dívida (só as dívidas antigas dele) */
-  readonly owing = computed(() => {
-    const winner = this.settlement()?.winner;
-    return (this.store.money()?.rows ?? [])
-      .map((r) => (r.player === winner ? { ...r, outstanding: 0 } : r))
-      .filter((r) => r.outstanding > 0 || r.oldDebts.length > 0);
-  });
-
   constructor() {
     if (!this.settlement()) void this.router.navigateByUrl('/');
-  }
-
-  suggested(r: MoneyRow): number {
-    return suggestedPayment(r);
   }
 
   async undoLast(): Promise<void> {

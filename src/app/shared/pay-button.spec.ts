@@ -27,14 +27,16 @@ describe('PayButton', () => {
     const { store, fixture, answer } = setup(10);
     answer('confirm', '5,50');
     await fixture.componentInstance.open();
-    expect(store.game()!.payments.map((p) => [p.player, p.amount])).toEqual([['Ana', 5.5]]);
+    expect(store.night()!.movements.map((m) => [m.kind, 'player' in m && m.player, m.amount])).toEqual([
+      ['in', 'Ana', 5.5],
+    ]);
   });
 
   it('does nothing on cancel', async () => {
     const { store, fixture, answer } = setup(10);
     answer('cancel', '5');
     await fixture.componentInstance.open();
-    expect(store.game()!.payments).toEqual([]);
+    expect(store.night()!.movements).toEqual([]);
   });
 
   it('does nothing on invalid input', async () => {
@@ -43,7 +45,7 @@ describe('PayButton', () => {
       answer('confirm', v);
       await fixture.componentInstance.open();
     }
-    expect(store.game()!.payments).toEqual([]);
+    expect(store.night()!.movements).toEqual([]);
   });
 
   it('prefills the suggested value with a comma, or empty when nothing is owed', async () => {

@@ -205,7 +205,7 @@ export class RoundPage {
     const res = await paid.onDidDismiss<{ values?: { amount?: string | number } }>();
     if (res.role === 'confirm') {
       const amount = parseAmount(res.data?.values?.amount);
-      if (amount !== null) this.store.addPayment(p.name, amount);
+      if (amount !== null) this.store.payIn(p.name, amount);
     }
   }
 

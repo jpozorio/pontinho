@@ -38,8 +38,8 @@ describe('GameStore', () => {
   });
 
   it('starts empty on unknown version', () => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({ version: 2, current: null, finished: [] }));
-    expect(fresh().data()).toEqual({ version: 1, current: null, finished: [] });
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ version: 3, current: null, finished: [] }));
+    expect(fresh().data()).toEqual({ version: 2, current: null, night: null, pendings: [] });
   });
 
   it('reads legacy game-value as default entry', () => {
@@ -61,7 +61,7 @@ describe('GameStore', () => {
     finishWithCarla(s);
     expect(s.archiveFinished()).toBe(true);
     expect(s.data().current).toBeNull();
-    expect(s.data().finished.length).toBe(1);
+    expect(s.night()!.games.length).toBe(1);
     const next = { entryValue: 2.5, reentryLimit: 'one', players: ['Carla', 'Ana', 'Beto'] };
     expect(s.nextConfig()).toEqual(next);
     TestBed.tick();
@@ -73,7 +73,7 @@ describe('GameStore', () => {
     s.startGame(config);
     expect(s.archiveFinished()).toBe(false);
     expect(s.game()).not.toBeNull();
-    expect(s.data().finished.length).toBe(0);
+    expect(s.night()!.games.length).toBe(0);
   });
 
   it('closeRound failure sets lastError and success clears it', () => {
@@ -83,17 +83,6 @@ describe('GameStore', () => {
     expect(s.lastError()).toBe('missing-scores');
     s.setDraftScore('Ana', 1);
     expect(s.lastError()).toBeNull();
-  });
-
-  it('debtsFor filters by debtor and money uses finished debts', () => {
-    const s = fresh();
-    s.startGame(config);
-    finishWithCarla(s);
-    s.archiveFinished();
-    s.startGame({ ...config, players: ['Carla', 'Ana', 'Beto'] });
-    expect(s.debtsFor(['Ana']).map((d) => d.debtor)).toEqual(['Ana']);
-    expect(s.debtsFor(['Zed'])).toEqual([]);
-    expect(s.money()?.rows.find((r) => r.player === 'Ana')?.oldDebts.length).toBe(1);
   });
 
   it('notices when decide or undo drops the agreement, and only then', () => {
@@ -127,7 +116,160 @@ describe('GameStore', () => {
     s.startGame(config);
     s.abandonGame();
     expect(s.game()).toBeNull();
-    expect(s.data().finished.length).toBe(0);
+    expect(s.night()!.games.length).toBe(0);
+  });
+
+  it('persists the night across reload', () => {
+    const s = fresh();
+    s.startGame(config);
+    finishWithCarla(s);
+    expect(s.archiveFinished()).toBe(true);
+    s.startGame({ ...config, players: ['Carla', 'Ana', 'Beto'] });
+    finishWithCarla(s);
+    expect(s.archiveFinished()).toBe(true);
+    s.startGame(config);
+    s.setDraftScore('Ana', 7);
+    expect(s.payIn('Ana', 5)).toBe(true);
+    expect(s.transfer('Beto', 'Carla', 2)).toBe(true);
+    expect(s.payOut('Carla', 3)).toBe(true);
+    TestBed.tick();
+    const before = s.data();
+    const after = fresh();
+    expect(after.data()).toEqual(before);
+    expect(after.night()!.games.length).toBe(2);
+    expect(after.night()!.movements.length).toBe(3);
+    expect(after.game()!.draft['Ana']).toBe(7);
+    expect(after.cash()).toEqual(s.cash());
+  });
+
+  it('startGame opens a night once', () => {
+    const s = fresh();
+    expect(s.night()).toBeNull();
+    expect(s.cash()).toBeNull();
+    s.startGame(config);
+    const id = s.night()!.id;
+    s.abandonGame();
+    s.startGame(config);
+    expect(s.night()!.id).toBe(id);
+    expect(s.cash()!.games).toBe(0);
+  });
+
+  it('archiveFinished adds to the night', () => {
+    const s = fresh();
+    s.startGame(config);
+    finishWithCarla(s);
+    const g = s.game()!;
+    expect(s.archiveFinished()).toBe(true);
+    expect(s.night()!.games).toEqual([g]);
+    expect(s.data().lastFinished).toEqual(g);
+    expect(s.cash()!.games).toBe(1);
+    expect(s.cash()!.rows.find((r) => r.player === 'Carla')!.balance).toBe(10);
+  });
+
+  it('abandoned game does not count but its movements stay', () => {
+    const s = fresh();
+    s.startGame(config);
+    expect(s.payIn('Ana', 5)).toBe(true);
+    expect(s.cash()!.rows.find((r) => r.player === 'Ana')!.balance).toBe(0);
+    s.abandonGame();
+    expect(s.cash()!.rows.find((r) => r.player === 'Ana')!.balance).toBe(5);
+    expect(s.cash()!.cash).toBe(5);
+    expect(s.night()!.games.length).toBe(0);
+  });
+
+  it('closeNight stores pendings and clears the night', () => {
+    const s = fresh();
+    s.startGame(config);
+    expect(s.closeNight()).toBe(false);
+    expect(s.lastError()).toBe('game-in-progress');
+    finishWithCarla(s);
+    expect(s.archiveFinished()).toBe(true);
+    expect(s.payIn('Ana', 5)).toBe(true);
+    expect(s.closeNight()).toBe(false);
+    expect(s.lastError()).toBe('cash-not-empty');
+    expect(s.payOut('Carla', 5)).toBe(true);
+    expect(s.closeNight()).toBe(true);
+    expect(s.lastError()).toBeNull();
+    expect(s.night()).toBeNull();
+    expect(s.cash()).toBeNull();
+    expect(s.pendings().map((p) => [p.debtor, p.creditor, p.amount])).toEqual([['Beto', 'Carla', 5]]);
+    expect(s.nextConfig()!.players).toEqual(['Carla', 'Ana', 'Beto']);
+    TestBed.tick();
+    expect(fresh().pendings()).toEqual(s.pendings());
+
+    s.startGame(config);
+    expect(s.night()!.movements).toEqual([]);
+    expect(s.pendings().length).toBe(1);
+    s.settlePending(s.pendings()[0].id);
+    expect(s.pendings()).toEqual([]);
+  });
+
+  it('closeNight with a finished game not yet archived takes it along', () => {
+    const s = fresh();
+    s.startGame(config);
+    finishWithCarla(s);
+    const g = s.game()!;
+    expect(s.closeNight()).toBe(true);
+    expect(s.game()).toBeNull();
+    expect(s.data().lastFinished).toEqual(g);
+    expect(s.pendings().map((p) => [p.debtor, p.creditor, p.amount])).toEqual([
+      ['Ana', 'Carla', 5],
+      ['Beto', 'Carla', 5],
+    ]);
+  });
+
+  it('payOut beyond cash sets lastError exceeds-cash', () => {
+    const s = fresh();
+    s.startGame(config);
+    expect(s.payIn('Ana', 5)).toBe(true);
+    expect(s.payOut('Beto', 10)).toBe(false);
+    expect(s.lastError()).toBe('exceeds-cash');
+    expect(s.night()!.movements.length).toBe(1);
+    expect(s.payOut('Beto', 5)).toBe(true);
+    expect(s.lastError()).toBeNull();
+    expect(s.transfer('Ana', 'Ana', 1)).toBe(false);
+    expect(s.lastError()).toBe('same-player');
+    expect(s.payIn('Ana', 0)).toBe(false);
+    expect(s.lastError()).toBe('invalid-amount');
+  });
+
+  it('removeMovement refuses to leave the cash negative', () => {
+    const s = fresh();
+    s.startGame(config);
+    s.payIn('Ana', 5);
+    s.payOut('Beto', 5);
+    const [paidIn, paidOut] = s.night()!.movements;
+    expect(s.removeMovement(paidIn.id)).toBe(false);
+    expect(s.lastError()).toBe('exceeds-cash');
+    expect(s.removeMovement(paidOut.id)).toBe(true);
+    expect(s.removeMovement(paidIn.id)).toBe(true);
+    expect(s.night()!.movements).toEqual([]);
+  });
+
+  it('cash actions fail without an open night', () => {
+    const s = fresh();
+    expect(s.payIn('Ana', 5)).toBe(false);
+    expect(s.closeNight()).toBe(false);
+    expect(s.night()).toBeNull();
+  });
+
+  it('migrates stored v1 on load', () => {
+    const current = {
+      id: 'g1',
+      startedAt: '2026-10-27T20:00:00.000Z',
+      config,
+      rounds: [{ scores: { Ana: 10, Beto: 20, Carla: 30 }, decisions: {} }],
+      draft: {},
+      payments: [{ id: 'p1', player: 'Beto', amount: 5, at: '2026-10-27T20:05:00.000Z' }],
+    };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ version: 1, current, finished: [] }));
+    const s = fresh();
+    expect(s.data().version).toBe(2);
+    expect(s.game()!.rounds.length).toBe(1);
+    expect(s.night()!.movements.map((m) => m.id)).toEqual(['p1']);
+    expect(s.cash()!.cash).toBe(5);
+    TestBed.tick();
+    expect(JSON.parse(localStorage.getItem(STORAGE_KEY)!).version).toBe(2);
   });
 
   it('does not throw when storage writes fail', () => {
