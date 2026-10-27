@@ -1,4 +1,153 @@
-/* You can add global styles to this file, and also import other style files */
+/* Tema "mesa de jogo": feltro verde, ouro e branco de carta. */
+
+:root {
+  --ion-font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Color Emoji',
+    'Apple Color Emoji', sans-serif;
+
+  --ion-color-primary: #1f6f4a;
+  --ion-color-primary-rgb: 31, 111, 74;
+  --ion-color-primary-contrast: #ffffff;
+  --ion-color-primary-contrast-rgb: 255, 255, 255;
+  --ion-color-primary-shade: #185c3d;
+  --ion-color-primary-tint: #357d5c;
+
+  --ion-color-secondary: #d9a441;
+  --ion-color-secondary-rgb: 217, 164, 65;
+  --ion-color-secondary-contrast: #1f2a24;
+  --ion-color-secondary-contrast-rgb: 31, 42, 36;
+  --ion-color-secondary-shade: #bf9039;
+  --ion-color-secondary-tint: #ddad54;
+
+  --ion-color-success: #2e9d5b;
+  --ion-color-success-rgb: 46, 157, 91;
+  --ion-color-success-contrast: #ffffff;
+  --ion-color-success-contrast-rgb: 255, 255, 255;
+  --ion-color-success-shade: #1b6e3e;
+  --ion-color-success-tint: #43a76b;
+
+  --ion-color-warning: #e08a1e;
+  --ion-color-warning-rgb: 224, 138, 30;
+  --ion-color-warning-contrast: #1f2a24;
+  --ion-color-warning-contrast-rgb: 31, 42, 36;
+  --ion-color-warning-shade: #9a5200;
+  --ion-color-warning-tint: #e39634;
+
+  --ion-color-danger: #d64545;
+  --ion-color-danger-rgb: 214, 69, 69;
+  --ion-color-danger-contrast: #ffffff;
+  --ion-color-danger-contrast-rgb: 255, 255, 255;
+  --ion-color-danger-shade: #b3261e;
+  --ion-color-danger-tint: #da5858;
+
+  /* fundo padrão (itens, modais, alertas) = branco de carta; o feltro fica no conteúdo das páginas */
+  --ion-background-color: #fffdf7;
+  --ion-background-color-rgb: 255, 253, 247;
+  --ion-text-color: #1f2a24;
+  --ion-text-color-rgb: 31, 42, 36;
+  --ion-toolbar-background: #1f6f4a;
+  --ion-toolbar-color: #ffffff;
+
+  /* tokens próprios: textos sobre a carta com contraste >= 4.5:1 */
+  --pp-felt: #14462f;
+  --pp-felt-deep: #0f3a26;
+  --pp-gold: #d9a441;
+  --pp-gold-light: #f3d48a;
+  --pp-card: #fffdf7;
+  --pp-ink: #1f2a24;
+  --pp-muted: #5c6b63;
+  --pp-ok: #1b6e3e;
+  --pp-near: #9a5200;
+  --pp-bust: #b3261e;
+  --pp-on-felt: #f4efe1;
+  --pp-on-felt-muted: #c9e3d4;
+  --pp-shadow: 0 2px 6px rgba(0, 0, 0, 0.25), 0 8px 20px rgba(0, 0, 0, 0.18);
+}
+
+body {
+  background: var(--pp-felt);
+  font-variant-numeric: tabular-nums;
+}
+
+/* feltro: verde escuro com luz de mesa no centro e uma trama bem sutil */
+ion-content {
+  --background: radial-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1.5px) 0 0 / 7px 7px,
+    radial-gradient(ellipse at 50% 0%, rgba(53, 125, 92, 0.55), transparent 65%), var(--pp-felt);
+  --color: var(--pp-on-felt);
+}
+
+ion-modal ion-content {
+  --background: var(--pp-card);
+  --color: var(--pp-ink);
+}
+
+ion-toolbar {
+  --background: linear-gradient(180deg, #2b8059 0%, #1f6f4a 55%, #185c3d 100%);
+  --color: #ffffff;
+  --border-color: var(--pp-gold);
+  --border-style: solid;
+  --border-width: 0 0 2px;
+}
+
+ion-title {
+  font-weight: 800;
+  letter-spacing: 0.01em;
+}
+
+ion-tab-bar {
+  --background: var(--pp-felt-deep);
+  --color: #a9cbb8;
+  --color-selected: var(--pp-gold);
+  --border: 0;
+  border-top: 2px solid var(--pp-gold);
+}
+
+/* carta: bloco branco sobre o feltro */
+.pp-card {
+  margin: 12px;
+  padding: 12px;
+  border-radius: 14px;
+  background: var(--pp-card);
+  color: var(--pp-ink);
+  box-shadow: var(--pp-shadow);
+}
+
+.pp-title {
+  margin: 0 0 8px;
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--pp-ink);
+}
+
+/* estado vazio com ilustração em emoji */
+.pp-empty {
+  margin: 48px 24px;
+  text-align: center;
+  color: var(--pp-on-felt);
+
+  .big {
+    display: block;
+    font-size: 4rem;
+    line-height: 1.2;
+    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.35));
+  }
+
+  p {
+    margin: 8px 0 0;
+    font-size: 1.05rem;
+    font-weight: 600;
+  }
+}
+
+/* aviso de erro legível sobre o feltro */
+.pp-error {
+  margin: 8px 12px 0;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: var(--pp-card);
+  color: var(--pp-bust);
+  font-weight: 600;
+  box-shadow: var(--pp-shadow);
+}
 
 .pre-line-alert .alert-message {
   white-space: pre-line;
