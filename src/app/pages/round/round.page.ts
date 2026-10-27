@@ -8,8 +8,6 @@ import {
   IonContent,
   IonHeader,
   IonInput,
-  IonSegment,
-  IonSegmentButton,
   IonTitle,
   IonToolbar,
   ToastController,
@@ -35,7 +33,7 @@ interface Row {
 
 @Component({
   selector: 'app-round',
-  imports: [CurrencyPipe, IonButton, IonButtons, IonContent, IonHeader, IonInput, IonSegment, IonSegmentButton, IonTitle, IonToolbar],
+  imports: [CurrencyPipe, IonButton, IonButtons, IonContent, IonHeader, IonInput, IonTitle, IonToolbar],
   templateUrl: './round.page.html',
   styleUrl: './round.page.scss',
 })
@@ -49,6 +47,9 @@ export class RoundPage {
   readonly money = this.store.money;
   private readonly invalidNames = signal<ReadonlySet<string>>(new Set());
   private readonly closeError = signal<ActionError | null>(null);
+
+  /** Rodada (já fechada) em que estouraram os jogadores que ainda podem mudar de decisão. */
+  readonly bustRound = computed(() => (this.view()?.nextRound ?? 1) - 1);
 
   readonly rows = computed<Row[]>(() => {
     const v = this.view();
@@ -129,12 +130,21 @@ export class RoundPage {
     this.store.setDraftScore(r.p.name, r.draft === 'bust' ? null : 'bust');
   }
 
-  async decide(name: string, ev: Event): Promise<void> {
-    const value = (ev as CustomEvent<{ value?: string | number }>).detail?.value;
+  async decide(name: string, decision: Decision): Promise<void> {
     this.closeError.set(null);
-    if (value !== 'reenter' && value !== 'out') return;
-    this.store.decide(name, value as Decision);
+    this.store.decide(name, decision);
     await showStoreNotice(this.store, this.toasts);
+  }
+
+  /** Troca a decisão de quem estourou na rodada anterior, com confirmação. */
+  async changeDecision(p: PlayerView): Promise<void> {
+    const next: Decision = p.decision === 'reenter' ? 'out' : 'reenter';
+    const what = next === 'out' ? 'sai' : `reentra com ${p.reentryTotal ?? 0}`;
+    const choice = await this.choose(`${p.name} estourou na rodada ${this.bustRound()}. Mudar para: ${what}?`, [
+      { text: 'Cancelar', role: 'cancel' },
+      { text: 'Mudar', role: 'confirm' },
+    ]);
+    if (choice === 'confirm') await this.decide(p.name, next);
   }
 
   async close(): Promise<void> {

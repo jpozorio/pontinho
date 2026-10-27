@@ -7,6 +7,7 @@
 
 .pcard {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 8px;
   padding: 10px 12px;
@@ -34,6 +35,25 @@
     .re {
       color: var(--ion-color-warning-shade);
     }
+
+    .tag {
+      margin-top: 2px;
+      padding: 1px 8px;
+      border: 1px solid currentColor;
+      border-radius: 10px;
+      background: none;
+      font-size: 0.8rem;
+      color: var(--ion-color-warning-shade);
+    }
+  }
+
+  .pending {
+    flex: 1 0 100%;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 8px;
+    font-size: 0.85rem;
   }
 }
 
