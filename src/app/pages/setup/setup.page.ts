@@ -4,6 +4,7 @@ import { Router, RouterLink } from '@angular/router';
 import {
   IonAlert,
   IonButton,
+  IonButtons,
   IonContent,
   IonHeader,
   IonInput,
@@ -22,6 +23,13 @@ import { parseAmount } from '../../shared/parse-amount';
 import { GameStore } from '../../state/game-store';
 import { canonicalName, validatePlayers } from './validate-players';
 
+interface Hint {
+  before: string;
+  amount: number;
+  after: string;
+  tone: 'pos' | 'neg';
+}
+
 interface Row {
   id: number;
   name: string;
@@ -34,6 +42,7 @@ interface Row {
     RouterLink,
     IonAlert,
     IonButton,
+    IonButtons,
     IonContent,
     IonHeader,
     IonInput,
@@ -77,15 +86,6 @@ export class SetupPage {
 
   readonly entryValue = computed(() => parseAmount(this.entryText()));
 
-  /** Pendência total por devedor (nome na grafia guardada). */
-  private readonly debtors = computed(() => {
-    const totals = new Map<string, number>();
-    for (const p of this.store.pendings()) {
-      totals.set(p.debtor, (totals.get(p.debtor) ?? 0) + p.amount);
-    }
-    return totals;
-  });
-
   /** Nomes já conhecidos: pendências (devedores e credores) e jogadores da noite. */
   private readonly known = computed(() => {
     const names = new Set<string>();
@@ -94,14 +94,24 @@ export class SetupPage {
     return [...names];
   });
 
-  /** Dívida a mostrar ao lado de cada linha, por id. */
-  readonly debtHints = computed(() => {
-    const totals = this.debtors();
+  /** Linhas de aviso (saldo da noite e pendências) de cada jogador digitado, por id. */
+  readonly hints = computed(() => {
     const known = this.known();
-    const hints = new Map<number, number>();
+    const pendings = this.store.pendings();
+    const balances = new Map((this.store.cash()?.rows ?? []).map((r) => [r.player, r.balance]));
+    const hints = new Map<number, Hint[]>();
     for (const r of this.rows()) {
-      const amount = totals.get(canonicalName(r.name, known)) ?? 0;
-      if (r.name.trim() !== '' && amount > 0) hints.set(r.id, amount);
+      if (r.name.trim() === '') continue;
+      const name = canonicalName(r.name, known);
+      const list: Hint[] = [];
+      const balance = balances.get(name) ?? 0;
+      if (balance < 0) list.push({ before: 'deve', amount: -balance, after: 'na noite', tone: 'neg' });
+      if (balance > 0) list.push({ before: 'a receber', amount: balance, after: 'na noite', tone: 'pos' });
+      for (const p of pendings) {
+        if (p.debtor === name) list.push({ before: 'deve', amount: p.amount, after: `a ${p.creditor}`, tone: 'neg' });
+        if (p.creditor === name) list.push({ before: 'a receber', amount: p.amount, after: `de ${p.debtor}`, tone: 'pos' });
+      }
+      if (list.length > 0) hints.set(r.id, list);
     }
     return hints;
   });
@@ -173,6 +183,10 @@ export class SetupPage {
     if ((ev as CustomEvent<{ role?: string }>).detail?.role !== 'confirm') return;
     this.store.abandonGame();
     if (this.filled().length === 0) this.resetForm();
+  }
+
+  openCaixa(): void {
+    void this.router.navigateByUrl('/caixa');
   }
 
   start(): void {

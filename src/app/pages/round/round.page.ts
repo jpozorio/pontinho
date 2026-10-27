@@ -168,7 +168,7 @@ export class RoundPage {
   async abandon(): Promise<void> {
     const a = await this.alerts.create({
       header: 'Abandonar a partida atual?',
-      message: 'Os pontos e pagamentos desta partida serão descartados.',
+      message: 'Os pontos desta partida serão descartados. Pagamentos feitos continuam no caixa.',
       buttons: [
         { text: 'Cancelar', role: 'cancel' },
         { text: 'Abandonar', role: 'confirm' },

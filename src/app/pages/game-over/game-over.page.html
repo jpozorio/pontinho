@@ -1,6 +1,9 @@
 <ion-header>
   <ion-toolbar>
     <ion-title>Fim de jogo</ion-title>
+    <ion-buttons slot="end">
+      <ion-button data-caixa (click)="openCaixa()">Caixa</ion-button>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
@@ -25,7 +28,7 @@
 
     <table class="report">
       <thead>
-        <tr><th>Jogador</th><th>Pôs</th><th>Recebe</th><th>Saldo</th></tr>
+        <tr><th>Jogador</th><th>Pôs</th><th>Recebe</th><th>Saldo</th><th>Na noite</th></tr>
       </thead>
       <tbody>
         @for (r of rows(); track r.player) {
@@ -35,6 +38,16 @@
             <td data-receives>{{ r.receives | currency: 'BRL' }}</td>
             <td data-balance [class.pos]="r.balance > 0" [class.neg]="r.balance < 0">
               {{ r.balance | currency: 'BRL' }}
+            </td>
+            <td data-night [class.pos]="(nightBalances().get(r.player) ?? 0) > 0" [class.neg]="(nightBalances().get(r.player) ?? 0) < 0">
+              @let nb = nightBalances().get(r.player) ?? 0;
+              @if (nb < 0) {
+                deve {{ -nb | currency: 'BRL' }}
+              } @else if (nb > 0) {
+                a receber {{ nb | currency: 'BRL' }}
+              } @else {
+                acertado
+              }
             </td>
           </tr>
         }

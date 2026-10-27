@@ -1,12 +1,12 @@
 import { CurrencyPipe } from '@angular/common';
 import { Component, computed, inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { AlertController, IonButton, IonContent, IonHeader, IonTitle, IonToolbar } from '@ionic/angular';
+import { AlertController, IonButton, IonButtons, IonContent, IonHeader, IonTitle, IonToolbar } from '@ionic/angular';
 import { GameStore } from '../../state/game-store';
 
 @Component({
   selector: 'app-game-over',
-  imports: [CurrencyPipe, IonButton, IonContent, IonHeader, IonTitle, IonToolbar],
+  imports: [CurrencyPipe, IonButton, IonButtons, IonContent, IonHeader, IonTitle, IonToolbar],
   templateUrl: './game-over.page.html',
   styleUrl: './game-over.page.scss',
 })
@@ -39,6 +39,9 @@ export class GameOverPage {
     return Math.round((s.pot - this.savers().reduce((a, [, v]) => a + v, 0)) * 100) / 100;
   });
 
+  /** Saldo acumulado na noite (já inclui esta partida), por jogador. */
+  readonly nightBalances = computed(() => new Map((this.store.cash()?.rows ?? []).map((r) => [r.player, r.balance])));
+
   constructor() {
     if (!this.settlement()) void this.router.navigateByUrl('/');
   }
@@ -56,6 +59,10 @@ export class GameOverPage {
     if ((await alert.onDidDismiss()).role !== 'confirm') return;
     this.store.undoFrom(this.rounds() - 1);
     await this.router.navigateByUrl('/jogo/rodada');
+  }
+
+  openCaixa(): void {
+    void this.router.navigateByUrl('/caixa');
   }
 
   async newGame(): Promise<void> {

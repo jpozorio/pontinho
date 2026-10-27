@@ -59,6 +59,27 @@ describe('GameOverPage', () => {
     expect(el.querySelector('tbody tr')!.getAttribute('data-row')).toBe('Davi');
   });
 
+  it('shows the night balance summing two games, a Caixa button and no leftover debt text', () => {
+    const { store, fixture, el, nav } = setup();
+    expect(store.archiveFinished()).toBe(true);
+    store.startGame({ entryValue: 10, reentryLimit: 'unlimited', players: ['Ana', 'Davi'] });
+    store.setDraftScore('Ana', 'bust');
+    store.setDraftScore('Davi', 5);
+    store.closeRound();
+    store.decide('Ana', 'out');
+    fixture.detectChanges();
+    const night = (p: string) => el.querySelector(`[data-row="${p}"] [data-night]`)!;
+    expect(el.querySelector('thead')!.textContent).toContain('Na noite');
+    expect(night('Ana').textContent!.replace(/\s+/g, ' ').trim()).toBe('deve R$ 10,00');
+    expect(night('Ana').classList).toContain('neg');
+    expect(night('Davi').textContent!.replace(/\s+/g, ' ').trim()).toBe('a receber R$ 30,00');
+    expect(night('Davi').classList).toContain('pos');
+    expect(el.textContent).not.toContain('Ainda falta pagar');
+    expect(el.textContent).not.toContain('dívida');
+    (el.querySelector('[data-caixa]') as HTMLElement).click();
+    expect(nav).toHaveBeenCalledWith('/caixa');
+  });
+
   it('says everything goes to the winner without agreement', () => {
     const { el } = setup({ agreement: false });
     expect(el.querySelector('[data-split]')!.textContent).toContain('tudo para Davi');

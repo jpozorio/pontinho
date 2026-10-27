@@ -104,7 +104,7 @@ describe('RoundPage', () => {
     await fixture.componentInstance.abandon();
     expect(create.mock.calls[0][0]).toMatchObject({
       header: 'Abandonar a partida atual?',
-      message: 'Os pontos e pagamentos desta partida serão descartados.',
+      message: 'Os pontos desta partida serão descartados. Pagamentos feitos continuam no caixa.',
     });
     expect(store.game()).not.toBeNull();
     expect(nav).not.toHaveBeenCalled();

@@ -96,20 +96,35 @@ describe('SetupPage', () => {
     fixture.detectChanges();
     const alert = (fixture.nativeElement as HTMLElement).querySelector('ion-alert')!;
     expect(alert.getAttribute('header')).toBe('Abandonar a partida atual?');
-    expect(alert.getAttribute('message')).toBe('Os pontos e pagamentos desta partida serão descartados.');
+    expect(alert.getAttribute('message')).toBe('Os pontos desta partida serão descartados. Pagamentos feitos continuam no caixa.');
   });
 
-  it('shows pending debts next to the debtor and canonicalizes names against the night and pendings', () => {
+  it('shows pendings per name, canonicalizes against the night and pendings, and starts with the stored spelling', () => {
     const store = configure();
     playAndArchive(store, { entryValue: 5, reentryLimit: 'unlimited', players: ['Ana', 'Beto'] }, 'Ana');
     expect(store.closeNight()).toBe(true);
     playAndArchive(store, { entryValue: 5, reentryLimit: 'unlimited', players: ['Carla', 'Davi'] }, 'Carla');
     const fixture = TestBed.createComponent(SetupPage);
     const page = fixture.componentInstance;
-    page.rows.set([{ id: 1, name: ' beto' }, { id: 2, name: 'ana' }, { id: 3, name: 'davi ' }]);
-    expect([...page.debtHints()]).toEqual([[1, 5]]);
+    page.rows.set([{ id: 1, name: ' beto' }, { id: 2, name: 'ana ' }, { id: 3, name: 'carla' }, { id: 4, name: 'davi ' }]);
+    fixture.detectChanges();
+    const el = fixture.nativeElement as HTMLElement;
+    const text = (id: number) => [...el.querySelectorAll(`[data-hint="${id}"]`)].map((e) => e.textContent!.replace(/\s+/g, ' ').trim());
+    expect(text(1)).toEqual(['deve R$ 5,00 a Ana']);
+    expect(text(2)).toEqual(['a receber R$ 5,00 de Beto']);
+    expect(text(3)).toEqual(['a receber R$ 5,00 na noite']);
+    expect(text(4)).toEqual(['deve R$ 5,00 na noite']);
     page.start();
-    expect(store.game()!.config.players).toEqual(['Beto', 'Ana', 'Davi']);
+    expect(store.game()!.config.players).toEqual(['Beto', 'Ana', 'Carla', 'Davi']);
+  });
+
+  it('has a Caixa button', () => {
+    configure();
+    const fixture = TestBed.createComponent(SetupPage);
+    fixture.detectChanges();
+    const nav = vi.spyOn(TestBed.inject(Router), 'navigateByUrl');
+    ((fixture.nativeElement as HTMLElement).querySelector('[data-caixa]') as HTMLElement).click();
+    expect(nav).toHaveBeenCalledWith('/caixa');
   });
 
   it('accepts only plain decimal entry values, rounded to cents', () => {
