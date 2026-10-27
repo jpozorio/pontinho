@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import {
   AlertController,
   IonButton,
+  IonButtons,
   IonContent,
   IonHeader,
   IonInput,
@@ -32,7 +33,7 @@ interface Row {
 
 @Component({
   selector: 'app-round',
-  imports: [CurrencyPipe, IonButton, IonContent, IonHeader, IonInput, IonSegment, IonSegmentButton, IonTitle, IonToolbar],
+  imports: [CurrencyPipe, IonButton, IonButtons, IonContent, IonHeader, IonInput, IonSegment, IonSegmentButton, IonTitle, IonToolbar],
   templateUrl: './round.page.html',
   styleUrl: './round.page.scss',
 })
@@ -81,6 +82,8 @@ export class RoundPage {
       }
       case 'invalid-score':
         return 'Pontos inválidos';
+      case 'game-over':
+        return 'A partida já terminou';
       default:
         return null;
     }
@@ -144,6 +147,22 @@ export class RoundPage {
     }
     const asking = (v?.players ?? []).filter((p) => p.status === 'deciding' && !p.decision && p.canReenter);
     for (const p of asking) await this.askReentry(p);
+  }
+
+  /** Abandona a partida em andamento (com confirmação) e vai para Novo jogo. */
+  async abandon(): Promise<void> {
+    const a = await this.alerts.create({
+      header: 'Abandonar a partida atual?',
+      message: 'Os pontos e pagamentos desta partida serão descartados.',
+      buttons: [
+        { text: 'Cancelar', role: 'cancel' },
+        { text: 'Abandonar', role: 'confirm' },
+      ],
+    });
+    await a.present();
+    if ((await a.onDidDismiss()).role !== 'confirm') return;
+    this.store.abandonGame();
+    await this.router.navigateByUrl('/novo');
   }
 
   private async askReentry(p: PlayerView): Promise<void> {

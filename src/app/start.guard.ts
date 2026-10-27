@@ -8,3 +8,10 @@ export const startGuard: CanActivateFn = () => {
   const target = !game ? '/novo' : game.finishedAt ? '/fim' : '/jogo/rodada';
   return inject(Router).parseUrl(target);
 };
+
+/** As abas da partida só abrem com uma partida em andamento. */
+export const gameGuard: CanActivateFn = () => {
+  const game = inject(GameStore).game();
+  if (game && !game.finishedAt) return true;
+  return inject(Router).parseUrl(game ? '/fim' : '/novo');
+};

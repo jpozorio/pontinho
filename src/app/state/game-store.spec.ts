@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
-import { startGuard } from '../start.guard';
+import { gameGuard, startGuard } from '../start.guard';
 import { GameConfig } from '../domain/model';
 import { GameStore, STORAGE_KEY } from './game-store';
 
@@ -139,5 +139,40 @@ describe('startGuard', () => {
     s.startGame(config);
     finishWithCarla(s);
     expect(TestBed.inject(Router).serializeUrl(run())).toBe('/fim');
+  });
+});
+
+describe('gameGuard', () => {
+  beforeEach(() => {
+    localStorage.clear();
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({ providers: [provideRouter([])] });
+  });
+
+  const run = () => TestBed.runInInjectionContext(() => gameGuard({} as never, {} as never));
+  const url = (r: ReturnType<typeof run>) => TestBed.inject(Router).serializeUrl(r as ReturnType<Router['parseUrl']>);
+
+  it('redirects to /novo without a game', () => {
+    expect(url(run())).toBe('/novo');
+  });
+
+  it('lets a running game through', () => {
+    TestBed.inject(GameStore).startGame(config);
+    expect(run()).toBe(true);
+  });
+
+  it('redirects to /fim when the game is finished', () => {
+    const s = TestBed.inject(GameStore);
+    s.startGame(config);
+    finishWithCarla(s);
+    expect(url(run())).toBe('/fim');
+  });
+
+  it('lets the game through again after undoing the last round', () => {
+    const s = TestBed.inject(GameStore);
+    s.startGame(config);
+    finishWithCarla(s);
+    s.undoFrom(0);
+    expect(run()).toBe(true);
   });
 });

@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { startGuard } from './start.guard';
+import { gameGuard, startGuard } from './start.guard';
 
 export const routes: Routes = [
   { path: '', pathMatch: 'full', canActivate: [startGuard], children: [] },
@@ -10,6 +10,7 @@ export const routes: Routes = [
   {
     path: 'jogo',
     loadComponent: () => import('./pages/game/game.page').then((m) => m.GamePage),
+    canActivate: [gameGuard],
     children: [
       { path: '', pathMatch: 'full', redirectTo: 'rodada' },
       { path: 'rodada', loadComponent: () => import('./pages/round/round.page').then((m) => m.RoundPage) },

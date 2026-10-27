@@ -1,6 +1,9 @@
 <ion-header>
   <ion-toolbar>
     <ion-title>Rodada {{ view()?.nextRound }}</ion-title>
+    <ion-buttons slot="end">
+      <ion-button data-abandon (click)="abandon()">Nova partida</ion-button>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 

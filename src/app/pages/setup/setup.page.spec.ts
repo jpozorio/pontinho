@@ -92,9 +92,11 @@ describe('SetupPage', () => {
 
   it('says points and payments are discarded when abandoning', () => {
     configure();
-    const page = TestBed.createComponent(SetupPage).componentInstance;
-    expect(page.abandonHeader).toBe('Abandonar a partida atual?');
-    expect(page.abandonMessage).toBe('Os pontos e pagamentos desta partida serão descartados.');
+    const fixture = TestBed.createComponent(SetupPage);
+    fixture.detectChanges();
+    const alert = (fixture.nativeElement as HTMLElement).querySelector('ion-alert')!;
+    expect(alert.getAttribute('header')).toBe('Abandonar a partida atual?');
+    expect(alert.getAttribute('message')).toBe('Os pontos e pagamentos desta partida serão descartados.');
   });
 
   it('accepts only plain decimal entry values, rounded to cents', () => {

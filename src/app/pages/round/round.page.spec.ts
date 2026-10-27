@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
-import { provideRouter } from '@angular/router';
-import { provideIonicAngular } from '@ionic/angular';
+import { Router, provideRouter } from '@angular/router';
+import { AlertController, provideIonicAngular } from '@ionic/angular';
 import { GameStore } from '../../state/game-store';
 import { RoundPage } from './round.page';
 
@@ -18,6 +18,8 @@ function setup() {
   fixture.detectChanges();
   return { store, fixture, el: fixture.nativeElement as HTMLElement };
 }
+
+const fake = (role: string) => ({ present: () => Promise.resolve(), onDidDismiss: () => Promise.resolve({ role }) });
 
 function type(el: HTMLElement, name: string, value: string): void {
   const input = el.querySelector(`ion-input[data-player="${name}"]`)!;
@@ -92,5 +94,33 @@ describe('RoundPage', () => {
     const row = el.querySelector('[data-row="Ana"]')!.textContent!;
     expect(row).toContain('20 → 25');
     expect(el.querySelector('[data-row="Ana"] .left b')!.textContent!.trim()).toBe('74');
+  });
+
+  it('abandons the game only after confirming, then goes to /novo', async () => {
+    const { store, fixture, el } = setup();
+    expect(el.querySelector('[data-abandon]')!.textContent).toContain('Nova partida');
+    const nav = vi.spyOn(TestBed.inject(Router), 'navigateByUrl').mockResolvedValue(true);
+    const create = vi.spyOn(TestBed.inject(AlertController), 'create').mockResolvedValue(fake('cancel') as never);
+    await fixture.componentInstance.abandon();
+    expect(create.mock.calls[0][0]).toMatchObject({
+      header: 'Abandonar a partida atual?',
+      message: 'Os pontos e pagamentos desta partida serão descartados.',
+    });
+    expect(store.game()).not.toBeNull();
+    expect(nav).not.toHaveBeenCalled();
+    create.mockResolvedValue(fake('confirm') as never);
+    await fixture.componentInstance.abandon();
+    expect(store.game()).toBeNull();
+    expect(store.data().finished.length).toBe(0);
+    expect(nav).toHaveBeenCalledWith('/novo');
+  });
+
+  it('says the game is over when closing a finished game', async () => {
+    const { store, fixture, el } = setup();
+    vi.spyOn(store, 'closeRound').mockReturnValue(false);
+    vi.spyOn(store, 'lastError').mockReturnValue('game-over');
+    await fixture.componentInstance.close();
+    fixture.detectChanges();
+    expect(el.textContent).toContain('A partida já terminou');
   });
 });

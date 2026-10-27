@@ -68,8 +68,8 @@
 
   <ion-alert
     [isOpen]="confirmOpen()"
-    [header]="abandonHeader"
-    [message]="abandonMessage"
+    header="Abandonar a partida atual?"
+    message="Os pontos e pagamentos desta partida serão descartados."
     [buttons]="alertButtons"
     (didDismiss)="onAlertDismiss($event)"
   ></ion-alert>

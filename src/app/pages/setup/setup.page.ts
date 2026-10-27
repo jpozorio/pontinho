@@ -18,7 +18,6 @@ import {
   IonToolbar,
 } from '@ionic/angular';
 import { ReentryLimit } from '../../domain/model';
-import { ABANDON_HEADER, ABANDON_MESSAGE } from '../../shared/abandon';
 import { parseAmount } from '../../shared/parse-amount';
 import { GameStore } from '../../state/game-store';
 import { computeDebts } from '../../domain/money';
@@ -76,9 +75,6 @@ export class SetupPage {
     { text: 'Cancelar', role: 'cancel' },
     { text: 'Abandonar', role: 'confirm' },
   ];
-
-  readonly abandonHeader = ABANDON_HEADER;
-  readonly abandonMessage = ABANDON_MESSAGE;
 
   readonly entryValue = computed(() => parseAmount(this.entryText()));
 
