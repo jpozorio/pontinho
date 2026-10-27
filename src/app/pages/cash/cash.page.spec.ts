@@ -8,6 +8,7 @@ import { AppData } from '../../domain/model';
 import { GameStore } from '../../state/game-store';
 import { AgreementModal } from './agreement.modal';
 import { CashPage } from './cash.page';
+import { SettleModal } from './settle.modal';
 import { TransferModal } from './transfer.modal';
 
 registerLocaleData(localePt);
@@ -64,6 +65,14 @@ describe('CashPage', () => {
     expect(el.querySelector('[data-row="Ana"] [data-balance]')!.textContent!.replace(/\s+/g, ' ')).toContain(
       'deve R$ 5,00',
     );
+  });
+
+  it('opens the settle modal from the Acerto final button', async () => {
+    const { fixture, el } = setup(['Ana', 'Beto', 'Carla']);
+    const create = vi.spyOn(TestBed.inject(ModalController), 'create').mockResolvedValue(fake('cancel') as never);
+    (el.querySelector('[data-settle-button]') as HTMLElement).click();
+    await fixture.whenStable();
+    expect(create.mock.calls[0][0].component).toBe(SettleModal);
   });
 
   it('saves an agreement and maps errors to Portuguese', async () => {

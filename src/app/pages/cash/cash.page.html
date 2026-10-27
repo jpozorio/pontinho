@@ -71,6 +71,8 @@
       }
     </section>
 
+    <ion-button expand="block" data-settle-button (click)="openSettle()">Acerto final</ion-button>
+
     @if (message(); as msg) {
       <p class="error" role="alert">{{ msg }}</p>
     }

@@ -18,6 +18,7 @@ import { parseAmount } from '../../shared/parse-amount';
 import { PayButton } from '../../shared/pay-button';
 import { GameStore } from '../../state/game-store';
 import { AgreementModal } from './agreement.modal';
+import { SettleModal } from './settle.modal';
 import { TransferModal, TransferResult } from './transfer.modal';
 
 const AGREEMENT_MESSAGES: Record<AgreementError, string> = {
@@ -128,6 +129,11 @@ export class CashPage {
     const amount = parseAmount(res.data.amount);
     if (amount === null) return this.raise('invalid-amount');
     if (!this.store.transfer(r.player, res.data.to, amount)) this.raise(this.store.lastError() as CashError | null);
+  }
+
+  async openSettle(): Promise<void> {
+    const modal = await this.modals.create({ component: SettleModal });
+    await modal.present();
   }
 
   async removeMovement(id: string): Promise<void> {
