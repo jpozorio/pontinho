@@ -52,10 +52,8 @@ describe('GameOverPage', () => {
     expect(store.view()!.winner).toBe('Davi');
     expect(el.querySelector('[data-winner]')!.textContent).toContain('Davi venceu');
     expect(el.querySelector('[data-rounds]')!.textContent).toContain('2 rodadas');
-    const split = el.querySelector('[data-split]')!.textContent!;
-    expect(split).toContain('40,00');
-    expect(split).toContain('Ana salvou');
-    expect(split).toContain('resto');
+    const split = el.querySelector('[data-split]')!.textContent!.replace(/\s+/g, ' ').trim();
+    expect(split).toBe('Pote R$ 40,00 · Ana salvou R$ 10,00 · Davi salvou R$ 10,00 · resto R$ 20,00 para Davi');
     expect(el.querySelector('[data-row="Davi"] [data-receives]')!.textContent).toContain('30,00');
     expect(el.querySelector('[data-row="Ana"] [data-receives]')!.textContent).toContain('10,00');
     expect(el.querySelector('tbody tr')!.getAttribute('data-row')).toBe('Davi');
@@ -75,6 +73,41 @@ describe('GameOverPage', () => {
     }
     fixture.detectChanges();
     expect(el.querySelector('[data-owing]')).toBeNull();
+  });
+
+  it('does not list the winner as owing their own entry', () => {
+    const { store, el } = setup();
+    expect(store.money()!.rows.find((r) => r.player === 'Davi')!.outstanding).toBe(10);
+    expect(el.querySelector('[data-owing-row="Davi"]')).toBeNull();
+    expect(el.querySelector('[data-owing-row="Ana"]')).not.toBeNull();
+  });
+
+  it('still lists old debts of the winner, without the current-game entry', () => {
+    localStorage.clear();
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({
+      providers: [
+        { provide: LOCALE_ID, useValue: 'pt-BR' },
+        provideIonicAngular({ mode: 'md', useSetInputAPI: true }),
+        provideRouter([]),
+      ],
+    });
+    const store = TestBed.inject(GameStore);
+    const play = (winner: string, loser: string) => {
+      store.startGame({ entryValue: 10, reentryLimit: 'unlimited', players: ['Ana', 'Davi'] });
+      store.setDraftScore(winner, 5);
+      store.setDraftScore(loser, 'bust');
+      expect(store.closeRound()).toBe(true);
+    };
+    play('Ana', 'Davi');
+    expect(store.archiveFinished()).toBe(true);
+    play('Davi', 'Ana');
+    const fixture = TestBed.createComponent(GameOverPage);
+    fixture.detectChanges();
+    const el = fixture.nativeElement as HTMLElement;
+    const davi = el.querySelector('[data-owing-row="Davi"]')!.textContent!;
+    expect(davi).toContain('ao Ana');
+    expect(davi).not.toContain('desta partida');
   });
 
   it('new game archives, clears current and navigates to /novo', async () => {

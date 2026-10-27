@@ -28,20 +28,26 @@ export class GameOverPage {
     return [...s.rows].sort((a, b) => Number(b.player === s.winner) - Number(a.player === s.winner));
   });
 
-  /** quanto sobra para o vencedor depois do que os outros salvaram */
-  readonly rest = computed(() => {
-    const s = this.settlement();
-    return s ? Math.round((s.winnerTakes - (s.saves[s.winner] ?? 0)) * 100) / 100 : 0;
-  });
-
+  /** todos que salvaram no acordo (inclusive o vencedor), na ordem dos jogadores */
   readonly savers = computed(() => {
     const s = this.settlement();
-    return s ? Object.entries(s.saves).filter(([name]) => name !== s.winner) : [];
+    return s ? s.rows.filter((r) => Object.hasOwn(s.saves, r.player)).map((r) => [r.player, s.saves[r.player]] as const) : [];
   });
 
-  readonly owing = computed(() =>
-    (this.store.money()?.rows ?? []).filter((r) => r.outstanding > 0 || r.oldDebts.length > 0),
-  );
+  /** o que sobra do pote para o vencedor depois de todos os valores salvos */
+  readonly rest = computed(() => {
+    const s = this.settlement();
+    if (!s) return 0;
+    return Math.round((s.pot - this.savers().reduce((a, [, v]) => a + v, 0)) * 100) / 100;
+  });
+
+  /** quem ainda deve; a entrada do próprio vencedor não é dívida (só as dívidas antigas dele) */
+  readonly owing = computed(() => {
+    const winner = this.settlement()?.winner;
+    return (this.store.money()?.rows ?? [])
+      .map((r) => (r.player === winner ? { ...r, outstanding: 0 } : r))
+      .filter((r) => r.outstanding > 0 || r.oldDebts.length > 0);
+  });
 
   constructor() {
     if (!this.settlement()) void this.router.navigateByUrl('/');
