@@ -104,6 +104,65 @@ describe('MoneyPage', () => {
   });
 });
 
+describe('MoneyPage debts', () => {
+  function withDebt() {
+    const { store } = setup(['Ana', 'Beto', 'Carla']);
+    store.setDraftScore('Ana', 'bust');
+    store.setDraftScore('Beto', 'bust');
+    store.setDraftScore('Carla', 5);
+    expect(store.closeRound()).toBe(true);
+    store.archiveAndPrepareNext();
+    store.startGame({ entryValue: 5, reentryLimit: 'unlimited', players: ['Carla', 'Ana', 'Beto'] });
+    const fixture = TestBed.createComponent(MoneyPage);
+    fixture.detectChanges();
+    return { store, fixture, el: fixture.nativeElement as HTMLElement };
+  }
+
+  it('shows an old debt with creditor and date, not ok until debt and entry are paid', () => {
+    const { store, fixture, el } = withDebt();
+    const row = () => el.querySelector('[data-row="Ana"]')!;
+    const d = new Date(store.data().finished[0].startedAt);
+    const dd = `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}`;
+    expect(row().querySelector('[data-debt]')!.textContent!.replace(/\s+/g, ' ')).toContain(
+      `deve R$ 5,00 ao Carla (partida de ${dd})`,
+    );
+    expect(row().querySelector('[data-ok]')).toBeNull();
+    expect(fixture.componentInstance.suggested(store.money()!.rows.find((r) => r.player === 'Ana')!)).toBe(10);
+    store.addPayment('Ana', 5);
+    fixture.detectChanges();
+    expect(row().querySelector('[data-debt]')).toBeNull();
+    expect(row().querySelector('[data-ok]')).toBeNull();
+    store.addPayment('Ana', 5);
+    fixture.detectChanges();
+    expect(row().querySelector('[data-ok]')).not.toBeNull();
+  });
+
+  it('suggests only the entry when there is no old debt, and 0 when settled', () => {
+    const { store, fixture } = setup(['Ana', 'Beto', 'Carla']);
+    const ana = () => store.money()!.rows.find((r) => r.player === 'Ana')!;
+    expect(fixture.componentInstance.suggested(ana())).toBe(5);
+    store.addPayment('Ana', 5);
+    expect(fixture.componentInstance.suggested(ana())).toBe(0);
+  });
+
+  it('clears a stale agreement error after a payment, and cancel saves nothing', async () => {
+    const { store, fixture, el } = setup(['Ana', 'Beto', 'Carla']);
+    down(store);
+    const create = vi
+      .spyOn(TestBed.inject(ModalController), 'create')
+      .mockResolvedValue(fake('cancel', null) as never);
+    await fixture.componentInstance.openAgreement();
+    expect(store.game()!.agreement).toBeUndefined();
+    create.mockResolvedValue(fake('save', { Beto: 10, Carla: 10 }) as never);
+    await fixture.componentInstance.openAgreement();
+    fixture.detectChanges();
+    expect(el.querySelector('.error')).not.toBeNull();
+    store.addPayment('Beto', 1);
+    fixture.detectChanges();
+    expect(el.querySelector('.error')).toBeNull();
+  });
+});
+
 describe('AgreementModal', () => {
   function modal() {
     TestBed.resetTestingModule();
@@ -129,5 +188,11 @@ describe('AgreementModal', () => {
     f.componentInstance.save();
     expect(f.componentInstance.error()).toBe('Valor inválido');
     expect(dismiss).not.toHaveBeenCalled();
+  });
+
+  it('cancel dismisses without values', () => {
+    const { f, dismiss } = modal();
+    f.componentInstance.cancel();
+    expect(dismiss).toHaveBeenCalledWith(null, 'cancel');
   });
 });

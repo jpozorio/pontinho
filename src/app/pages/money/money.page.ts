@@ -36,7 +36,12 @@ export class MoneyPage {
 
   readonly money = this.store.money;
   readonly game = this.store.game;
-  readonly message = signal<string | null>(null);
+  /** erro de acordo, preso à lista de pagamentos do momento: qualquer pagamento novo/removido o apaga */
+  private readonly raised = signal<{ text: string; payments: unknown } | null>(null);
+  readonly message = computed(() => {
+    const r = this.raised();
+    return r && r.payments === this.game()?.payments ? r.text : null;
+  });
   private readonly expanded = signal<ReadonlySet<string>>(new Set());
 
   readonly canAgree = computed(() => {
@@ -85,7 +90,7 @@ export class MoneyPage {
     const g = this.game();
     const v = this.store.view();
     if (!g || !v) return;
-    this.message.set(null);
+    this.raised.set(null);
     const modal = await this.modals.create({
       component: AgreementModal,
       componentProps: {
@@ -99,12 +104,12 @@ export class MoneyPage {
     if (res.role !== 'save' || !res.data) return;
     if (this.store.setAgreement(res.data)) return;
     const e = this.store.lastError() as AgreementError | null;
-    this.message.set((e && AGREEMENT_MESSAGES[e]) ?? 'Valor inválido');
+    this.raised.set({ text: (e && AGREEMENT_MESSAGES[e]) ?? 'Valor inválido', payments: g.payments });
   }
 
   async removeAgreement(): Promise<void> {
     if (await this.confirm('Remover o acordo?', 'Remover')) {
-      this.message.set(null);
+      this.raised.set(null);
       this.store.clearAgreement();
     }
   }

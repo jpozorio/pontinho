@@ -4,5 +4,5 @@ export function parseAmount(raw: unknown, allowZero = false): number | null {
   if (text === '' || !/^\d+(\.\d+)?$/.test(text)) return null;
   const n = Number(text);
   if (!Number.isFinite(n) || n < 0 || (n === 0 && !allowZero)) return null;
-  return n;
+  return Math.round(n * 100) / 100;
 }
