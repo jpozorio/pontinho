@@ -1,0 +1,23 @@
+.hint {
+  font-size: 0.85rem;
+  color: var(--ion-color-medium);
+  margin: 0 0 8px;
+}
+
+.debt {
+  color: var(--ion-color-danger);
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+
+.error {
+  color: var(--ion-color-danger);
+  margin: 8px 0;
+}
+
+.warning {
+  border: 1px solid var(--ion-color-warning);
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 16px;
+}
