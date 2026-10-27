@@ -119,6 +119,11 @@ describe('cash', () => {
     expect('night' in removeMovement(n, outId, null)).toBe(true);
   });
 
+  it('counts a finished current game among the games of the night', () => {
+    expect(computeCash(base(), won('Carla')).games).toBe(3);
+    expect(computeCash(base(), null).games).toBe(2);
+  });
+
   it('closeNight blocks with game in progress', () => {
     const g = game([round({ Ana: 10, Beto: 10, Carla: 10 })]);
     expect(closeNight(base(), g)).toEqual({ error: 'game-in-progress' });

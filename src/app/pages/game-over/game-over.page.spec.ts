@@ -105,6 +105,19 @@ describe('GameOverPage', () => {
     expect(nav).toHaveBeenCalledWith('/jogo/rodada');
   });
 
+  it('redirects to / on re-entering the cached page after the night is closed', () => {
+    const { store, fixture, nav } = setup();
+    nav.mockClear();
+    fixture.componentInstance.ionViewWillEnter();
+    expect(nav).not.toHaveBeenCalled();
+    for (const p of ['Ana', 'Beto', 'Carla', 'Davi']) store.payIn(p, 10);
+    store.payOut('Davi', 30);
+    store.payOut('Ana', 10);
+    expect(store.closeNight()).toBe(true);
+    fixture.componentInstance.ionViewWillEnter();
+    expect(nav).toHaveBeenCalledWith('/', { replaceUrl: true });
+  });
+
   it('redirects to / when the game has no winner', () => {
     const { nav } = setup({ finish: false });
     expect(nav).toHaveBeenCalledWith('/');

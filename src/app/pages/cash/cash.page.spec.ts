@@ -1,8 +1,8 @@
 import { registerLocaleData } from '@angular/common';
 import localePt from '@angular/common/locales/pt';
-import { LOCALE_ID } from '@angular/core';
+import { LOCALE_ID, WritableSignal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { provideRouter } from '@angular/router';
+import { Router, provideRouter } from '@angular/router';
 import { AlertController, ModalController, provideIonicAngular } from '@ionic/angular';
 import { AppData } from '../../domain/model';
 import { GameStore } from '../../state/game-store';
@@ -41,6 +41,8 @@ function down(store: GameStore): void {
   expect(store.closeRound()).toBe(true);
   store.decide('Ana', 'out');
 }
+
+const text = (e: Element | null) => (e?.textContent ?? '').replace(/\s+/g, ' ').trim();
 
 describe('CashPage', () => {
   it('hides the agreement button with 3 playing and shows it with 2', () => {
@@ -94,6 +96,48 @@ describe('CashPage', () => {
       'Beto salva R$ 5,00 · Carla salva R$ 5,00',
     );
     expect(el.querySelector('.error')).toBeNull();
+  });
+
+  it('navigates to / after closing the night outside the game tab', async () => {
+    const { fixture } = setup(['Ana', 'Beto']);
+    const nav = vi.spyOn(TestBed.inject(Router), 'navigateByUrl').mockResolvedValue(true);
+    vi.spyOn(TestBed.inject(ModalController), 'create').mockResolvedValue(fake('closed') as never);
+    await fixture.componentInstance.openSettle();
+    expect(nav).toHaveBeenCalledWith('/', { replaceUrl: true });
+  });
+
+  it('does not navigate when the settle modal is only dismissed', async () => {
+    const { fixture } = setup(['Ana', 'Beto']);
+    const nav = vi.spyOn(TestBed.inject(Router), 'navigateByUrl').mockResolvedValue(true);
+    vi.spyOn(TestBed.inject(ModalController), 'create').mockResolvedValue(fake('cancel') as never);
+    await fixture.componentInstance.openSettle();
+    expect(nav).not.toHaveBeenCalled();
+  });
+
+  it('counts a finished game that is not archived yet', () => {
+    const { store, fixture, el } = setup(['Ana', 'Beto']);
+    store.setDraftScore('Ana', 'bust');
+    store.setDraftScore('Beto', 5);
+    store.closeRound();
+    fixture.detectChanges();
+    expect(text(el.querySelector('[data-games]'))).toBe('1 partida encerrada na noite');
+  });
+
+  it('hides the migration note for a regular night', () => {
+    const { el } = setup(['Ana', 'Beto']);
+    expect(el.querySelector('[data-migrated]')).toBeNull();
+  });
+
+  it('shows the migration note on top for a migrated night', async () => {
+    const { store, fixture, el } = setup(['Ana', 'Beto']);
+    (store as unknown as { _data: WritableSignal<AppData> })._data.update((d) => ({
+      ...d,
+      night: { ...d.night!, migrated: true },
+    }));
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(text(el.querySelector('[data-migrated]'))).toContain('veio da versão anterior');
   });
 });
 
@@ -168,7 +212,6 @@ describe('AgreementModal', () => {
 });
 
 describe('CashPage cash box', () => {
-  const text = (e: Element | null) => (e?.textContent ?? '').replace(/\s+/g, ' ').trim();
 
   function alertAnswer(role: string, amount?: string) {
     const create = vi.spyOn(TestBed.inject(AlertController), 'create');

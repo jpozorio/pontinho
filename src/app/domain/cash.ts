@@ -59,7 +59,8 @@ export function computeCash(night: Night, current: Game | null): CashView {
     const rc = cents(received.get(player) ?? 0);
     return { player, result: r, paid: pd, received: rc, balance: cents(r + pd - rc) };
   });
-  return { cash: cashOf(night.movements), games: night.games.length, rows };
+  const currentDone = current !== null && computeGame(current).winner !== null;
+  return { cash: cashOf(night.movements), games: night.games.length + (currentDone ? 1 : 0), rows };
 }
 
 export function addMovement(
@@ -90,7 +91,6 @@ export function removeMovement(
 export function closeNight(
   night: Night,
   current: Game | null,
-  _now: Date = new Date(),
 ): { pendings: Pending[] } | { error: CashError } {
   if (current && computeGame(current).winner === null) return { error: 'game-in-progress' };
   const view = computeCash(night, current);

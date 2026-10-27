@@ -46,6 +46,11 @@ export class GameOverPage {
     if (!this.settlement()) void this.router.navigateByUrl('/');
   }
 
+  /** A página fica em cache: ao voltar depois de fechar a noite, não há mais o que mostrar. */
+  ionViewWillEnter(): void {
+    if (!this.settlement()) void this.router.navigateByUrl('/', { replaceUrl: true });
+  }
+
   async undoLast(): Promise<void> {
     const alert = await this.alerts.create({
       header: 'Desfazer a última rodada?',

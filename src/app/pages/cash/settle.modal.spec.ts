@@ -1,10 +1,12 @@
 import { registerLocaleData } from '@angular/common';
 import localePt from '@angular/common/locales/pt';
-import { LOCALE_ID } from '@angular/core';
+import { LOCALE_ID, WritableSignal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { AlertController, ModalController, ToastController, provideIonicAngular } from '@ionic/angular';
+import { AppData } from '../../domain/model';
 import { GameStore } from '../../state/game-store';
 import { SettleModal } from './settle.modal';
+import { TransferModal } from './transfer.modal';
 
 registerLocaleData(localePt);
 
@@ -76,6 +78,7 @@ describe('SettleModal', () => {
     const opts = alertCreate.mock.calls[0][0]!;
     expect(opts.header).toBe('Fechar a noite?');
     expect(opts.message).toBe('Carla deve R$\u00a05,00 a Ana');
+    expect(opts.cssClass).toBe('pre-line-alert');
     expect(store.night()).toBeNull();
     expect(store.pendings().map((p) => [p.debtor, p.creditor, p.amount])).toEqual([['Carla', 'Ana', 5]]);
     expect(dismiss).toHaveBeenCalled();
@@ -98,10 +101,10 @@ describe('SettleModal', () => {
     finish(store);
     const create = vi.spyOn(TestBed.inject(AlertController), 'create').mockResolvedValue(fake('cancel') as never);
     await fixture.componentInstance.close();
-    expect(create.mock.calls[0][0]!.message).toBe('Beto deve R$\u00a05,00 a Ana<br>Carla deve R$\u00a05,00 a Ana');
+    expect(create.mock.calls[0][0]!.message).toBe('Beto deve R$\u00a05,00 a Ana\nCarla deve R$\u00a05,00 a Ana');
   });
 
-  it('escapes player names in the confirmation', async () => {
+  it('keeps player names as plain text in the confirmation', async () => {
     localStorage.clear();
     TestBed.resetTestingModule();
     TestBed.configureTestingModule({
@@ -116,7 +119,41 @@ describe('SettleModal', () => {
     fixture.detectChanges();
     const create = vi.spyOn(TestBed.inject(AlertController), 'create').mockResolvedValue(fake('cancel') as never);
     await fixture.componentInstance.close();
-    expect(create.mock.calls[0][0]!.message).toBe('&lt;b&gt;Beto&lt;/b&gt; deve R$\u00a05,00 a Ana');
+    expect(create.mock.calls[0][0]!.message).toBe('<b>Beto</b> deve R$\u00a05,00 a Ana');
+  });
+
+  it('registers a direct player payment through the transfer modal', async () => {
+    const { store, fixture } = setup();
+    finish(store);
+    fixture.detectChanges();
+    const create = vi
+      .spyOn(TestBed.inject(ModalController), 'create')
+      .mockResolvedValue(fake('save', { to: 'Ana', amount: 5 }) as never);
+    const el = fixture.nativeElement as HTMLElement;
+    expect(el.querySelectorAll('[data-payer="Carla"] [data-transfer]')).toHaveLength(1);
+    await fixture.componentInstance.openTransfer(store.cash()!.rows.find((r) => r.player === 'Carla')!);
+    expect(create.mock.calls[0][0].component).toBe(TransferModal);
+    expect(create.mock.calls[0][0].componentProps).toMatchObject({
+      from: 'Carla',
+      others: ['Ana', 'Beto'],
+      suggested: 5,
+    });
+    expect(store.night()!.movements[0]).toMatchObject({ kind: 'transfer', from: 'Carla', to: 'Ana', amount: 5 });
+  });
+
+  it('hides the migration note for a regular night', () => {
+    const { el } = setup();
+    expect(el.querySelector('[data-migrated]')).toBeNull();
+  });
+
+  it('shows the migration note for a migrated night', () => {
+    const { store, fixture, el } = setup();
+    (store as unknown as { _data: WritableSignal<AppData> })._data.update((d) => ({
+      ...d,
+      night: { ...d.night!, migrated: true },
+    }));
+    fixture.detectChanges();
+    expect(text(el.querySelector('[data-migrated]'))).toContain('Esta noite veio da versão anterior do app');
   });
 
   it('says nobody owes when the night is already even', async () => {

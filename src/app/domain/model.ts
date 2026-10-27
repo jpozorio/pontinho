@@ -52,6 +52,8 @@ export interface Night {
   startedAt: string;
   games: Game[];
   movements: Movement[];
+  /** noite montada a partir da versão 1: os pagamentos antigos entraram todos no caixa */
+  migrated?: true;
 }
 
 export interface Pending {

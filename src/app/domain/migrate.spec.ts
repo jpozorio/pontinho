@@ -49,6 +49,7 @@ describe('migrate', () => {
     expect(data.night!.games.map((g) => g.id)).toEqual(['early', 'late']);
     expect(data.night!.games.every((g) => !('payments' in g))).toBe(true);
     expect(data.night!.startedAt).toBe('2026-10-27T19:00:00.000Z');
+    expect(data.night!.migrated).toBe(true);
     expect(data.night!.movements.map((m) => m.id)).toEqual(['p2']);
     expect(data.lastFinished!.id).toBe('late');
     expect('payments' in data.lastFinished!).toBe(false);
@@ -85,6 +86,8 @@ describe('migrate', () => {
       lastConfig: { entryValue: 2, reentryLimit: 'one' },
     };
     expect(migrate(JSON.parse(JSON.stringify(data)))).toEqual(data);
+    const flagged = { ...data, night: { ...night, migrated: true } };
+    expect(migrate(JSON.parse(JSON.stringify(flagged))).night!.migrated).toBe(true);
     expect(migrate({ version: 2 })).toEqual({ version: 2, current: null, night: null, pendings: [] });
   });
 

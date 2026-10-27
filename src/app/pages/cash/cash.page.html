@@ -18,6 +18,10 @@
       }
     </div>
 
+    @if (night()?.migrated) {
+      <p class="note" data-migrated>{{ migratedNote }}</p>
+    }
+
     @if (playing() && money(); as m) {
       <section data-current>
         <h2>Partida atual</h2>

@@ -82,7 +82,7 @@ function fromV1(d: Record<string, unknown>, now: Date): AppData {
       .map((g) => text(g.startedAt))
       .filter((s) => s !== '')
       .sort()[0] ?? now.toISOString();
-  const night: Night = { id: crypto.randomUUID(), startedAt, games: finished.map(strip), movements };
+  const night: Night = { id: crypto.randomUUID(), startedAt, games: finished.map(strip), movements, migrated: true };
   data.night = night;
   if (night.games.length > 0) data.lastFinished = night.games.at(-1);
   return data;

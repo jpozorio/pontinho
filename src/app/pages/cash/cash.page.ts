@@ -1,6 +1,6 @@
 import { CurrencyPipe, DatePipe } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import {
   AlertController,
   IonBackButton,
@@ -13,6 +13,7 @@ import {
   ModalController,
 } from '@ionic/angular';
 import { CashError, CashRow } from '../../domain/cash';
+import { migratedNoteText } from '../../domain/migrated-note';
 import { AgreementError } from '../../domain/money';
 import { parseAmount } from '../../shared/parse-amount';
 import { PayButton } from '../../shared/pay-button';
@@ -55,11 +56,13 @@ export class CashPage {
   private readonly alerts = inject(AlertController);
   private readonly modals = inject(ModalController);
   private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
 
   /** Na aba da partida não há botão voltar; fora dela (#/caixa) há. */
   readonly inTab = this.route.snapshot.parent?.routeConfig?.path === 'jogo';
 
   readonly night = this.store.night;
+  readonly migratedNote = migratedNoteText();
   readonly cash = this.store.cash;
   readonly pendings = this.store.pendings;
   readonly money = this.store.money;
@@ -134,6 +137,9 @@ export class CashPage {
   async openSettle(): Promise<void> {
     const modal = await this.modals.create({ component: SettleModal });
     await modal.present();
+    const res = await modal.onDidDismiss();
+    // noite fechada fora da aba da partida: não sobra para onde voltar além do início
+    if (res.role === 'closed' && !this.inTab) await this.router.navigateByUrl('/', { replaceUrl: true });
   }
 
   async removeMovement(id: string): Promise<void> {
