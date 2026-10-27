@@ -53,34 +53,36 @@
         }
 
         @if (r.p.playsNextRound) {
-          <ion-input
-            class="inp"
-            type="number"
-            inputmode="numeric"
-            min="0"
-            placeholder="–"
-            [attr.data-player]="r.p.name"
-            [value]="inputValue(r)"
-            [disabled]="r.draft === 'bust'"
-            [class.ion-invalid]="r.invalid"
-            [class.ion-touched]="r.invalid"
-            (ionInput)="onInput(r.p.name, $event)"
-          ></ion-input>
-          <ion-button
-            size="small"
-            shape="round"
-            color="danger"
-            [fill]="r.draft === 'bust' ? 'solid' : 'outline'"
-            (click)="toggleBust(r)"
-          >
-            estourou
-          </ion-button>
-          <div [class]="'left ' + r.level">
-            @if (r.left === null || r.left < 0) {
-              <b>💥</b>estourou
-            } @else {
-              <b>{{ r.left }}</b>faltam{{ r.level === 'near' ? ' 🔥' : '' }}
-            }
+          <div class="ctrl">
+            <ion-input
+              class="inp"
+              type="number"
+              inputmode="numeric"
+              min="0"
+              placeholder="–"
+              [attr.data-player]="r.p.name"
+              [value]="inputValue(r)"
+              [disabled]="r.draft === 'bust'"
+              [class.ion-invalid]="r.invalid"
+              [class.ion-touched]="r.invalid"
+              (ionInput)="onInput(r.p.name, $event)"
+            ></ion-input>
+            <ion-button
+              size="small"
+              shape="round"
+              color="danger"
+              [fill]="r.draft === 'bust' ? 'solid' : 'outline'"
+              (click)="toggleBust(r)"
+            >
+              estourou
+            </ion-button>
+            <div [class]="'left ' + r.level">
+              @if (r.left === null || r.left < 0) {
+                <b>💥</b>estourou
+              } @else {
+                <b>{{ r.left }}</b>faltam{{ r.level === 'near' ? ' 🔥' : '' }}
+              }
+            </div>
           </div>
         }
       </div>

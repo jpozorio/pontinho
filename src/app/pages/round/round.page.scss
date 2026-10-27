@@ -35,7 +35,7 @@
   }
 
   &.grey {
-    opacity: 0.6;
+    opacity: 0.75;
     border-left-color: #9aa59f;
   }
 
@@ -44,15 +44,16 @@
     animation: bust-shake 0.45s ease, bust-flash 0.9s ease;
   }
 
+  /* nome com pelo menos ~120px; se não couber com os controles, eles descem para a linha de baixo */
   .nm {
-    flex: 1;
+    flex: 1 1 7.5rem;
     min-width: 0;
 
     b {
       display: block;
       font-size: 1.1rem;
       font-weight: 800;
-      overflow-wrap: anywhere;
+      overflow-wrap: break-word;
     }
 
     span {
@@ -84,6 +85,16 @@
     gap: 4px 8px;
     font-size: 0.85rem;
   }
+}
+
+/* controles juntos: descem de linha inteiros; margin-left: auto os alinha à direita
+   (na mesma linha do nome não muda nada, porque o nome cresce e ocupa a sobra) */
+.ctrl {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
 }
 
 .inp {

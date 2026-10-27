@@ -27,8 +27,9 @@ export class GameOverPage {
 
   readonly view = this.store.view;
   readonly confetti = CONFETTI;
-  /** muda a cada entrada na página para recriar (e tocar de novo) o confete */
+  /** muda a cada nova entrada na página (a primeira já toca ao criar) para recriar e tocar de novo o confete */
   readonly party = signal(0);
+  private entered = false;
   readonly settlement = computed(() => (this.view()?.winner ? (this.store.money()?.settlement ?? null) : null));
   readonly rounds = computed(() => this.view()?.history.length ?? 0);
 
@@ -62,7 +63,8 @@ export class GameOverPage {
   /** A página fica em cache: ao voltar depois de fechar a noite, não há mais o que mostrar. */
   ionViewWillEnter(): void {
     if (!this.settlement()) void this.router.navigateByUrl('/', { replaceUrl: true });
-    this.party.update((n) => n + 1);
+    if (this.entered) this.party.update((n) => n + 1);
+    this.entered = true;
   }
 
   async undoLast(): Promise<void> {
