@@ -149,4 +149,60 @@ describe('cash', () => {
     ]);
     expect(r.pendings.every((p) => p.date === n.startedAt)).toBe(true);
   });
+
+  const mvs = (list: NewMovement[]): Movement[] =>
+    list.map((m, i) => ({ ...m, id: 'm' + i, at: 'x' }) as Movement);
+  const pendingsOf = (n: Night, current: Game | null = null): [string, string, number][] => {
+    const r = closeNight(n, current);
+    if (!('pendings' in r)) throw new Error('unexpected ' + r.error);
+    return r.pendings.map((p): [string, string, number] => [p.debtor, p.creditor, p.amount]);
+  };
+
+  it('closeNight re-picks the largest open debt and credit at each step', () => {
+    const n = nightWith(
+      [],
+      mvs([
+        { kind: 'in', player: 'C1', amount: 12 },
+        { kind: 'in', player: 'C2', amount: 6 },
+        { kind: 'out', player: 'D1', amount: 10 },
+        { kind: 'out', player: 'D2', amount: 8 },
+      ]),
+    );
+    expect(pendingsOf(n)).toEqual([
+      ['D1', 'C1', 10],
+      ['D2', 'C2', 6],
+      ['D2', 'C1', 2],
+    ]);
+  });
+
+  it('closeNight works with a finished game not yet archived', () => {
+    const g = won('Ana');
+    let n = apply(nightWith([]), { kind: 'in', player: 'Beto', amount: 5 }, g);
+    n = apply(n, { kind: 'out', player: 'Ana', amount: 5 }, g);
+    expect(pendingsOf(n, g)).toEqual([['Carla', 'Ana', 5]]);
+  });
+
+  it('refuses removing an in after a transfer and an out', () => {
+    let n = apply(base(), { kind: 'in', player: 'Carla', amount: 10 });
+    n = apply(n, { kind: 'transfer', from: 'Carla', to: 'Beto', amount: 3 });
+    n = apply(n, { kind: 'out', player: 'Ana', amount: 4 });
+    const inId = n.movements.find((m) => m.kind === 'in')!.id;
+    expect(removeMovement(n, inId, null)).toEqual({ error: 'exceeds-cash' });
+  });
+
+  it('uneven cents split among 3+ debtors sums exactly', () => {
+    const n = nightWith(
+      [],
+      mvs([
+        { kind: 'in', player: 'Cred', amount: 10 },
+        { kind: 'out', player: 'A', amount: 3.34 },
+        { kind: 'out', player: 'B', amount: 3.33 },
+        { kind: 'out', player: 'C', amount: 3.33 },
+      ]),
+    );
+    const list = pendingsOf(n);
+    expect(list.length).toBe(3);
+    expect(list.every((p) => p[1] === 'Cred')).toBe(true);
+    expect(Math.round(list.reduce((a, p) => a + p[2], 0) * 100)).toBe(1000);
+  });
 });

@@ -101,23 +101,18 @@ export function closeNight(
 
   const debtors = view.rows.filter((r) => r.balance < 0).map((r) => ({ p: r.player, left: -r.balance }));
   const creditors = view.rows.filter((r) => r.balance > 0).map((r) => ({ p: r.player, left: r.balance }));
-  debtors.sort((a, b) => b.left - a.left);
-  creditors.sort((a, b) => b.left - a.left);
+  const largest = <T extends { left: number }>(xs: T[]): T | undefined =>
+    xs.reduce<T | undefined>((best, x) => (x.left > 0 && (!best || x.left > best.left) ? x : best), undefined);
 
   const pendings: Pending[] = [];
-  let i = 0;
-  let j = 0;
-  while (i < debtors.length && j < creditors.length) {
-    const d = debtors[i];
-    const c = creditors[j];
+  for (;;) {
+    const d = largest(debtors);
+    const c = largest(creditors);
+    if (!d || !c) break;
     const amount = cents(Math.min(d.left, c.left));
-    if (amount > 0) {
-      pendings.push({ id: crypto.randomUUID(), debtor: d.p, creditor: c.p, amount, date: night.startedAt });
-    }
+    pendings.push({ id: crypto.randomUUID(), debtor: d.p, creditor: c.p, amount, date: night.startedAt });
     d.left = cents(d.left - amount);
     c.left = cents(c.left - amount);
-    if (d.left <= 0) i++;
-    if (c.left <= 0) j++;
   }
   return { pendings };
 }
