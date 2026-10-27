@@ -9,9 +9,11 @@ import {
   IonTitle,
   IonToolbar,
   ModalController,
+  ToastController,
 } from '@ionic/angular';
 import { PlayerView } from '../../domain/engine';
 import { Score } from '../../domain/model';
+import { showStoreNotice } from '../../shared/notice-toast';
 import { GameStore } from '../../state/game-store';
 import { LeftLevel, leftLevel } from '../round/points-left';
 import { EditRoundModal } from './edit-round.modal';
@@ -33,6 +35,7 @@ export class HistoryPage {
   private readonly router = inject(Router);
   private readonly alerts = inject(AlertController);
   private readonly modals = inject(ModalController);
+  private readonly toasts = inject(ToastController);
 
   readonly view = this.store.view;
   readonly game = this.store.game;
@@ -98,6 +101,7 @@ export class HistoryPage {
     if ((await a.onDidDismiss()).role !== 'confirm') return;
     this.store.undoFrom(index);
     this.message.set(null);
+    await showStoreNotice(this.store, this.toasts);
     if (goToRound) await this.router.navigateByUrl('/jogo/rodada');
   }
 }

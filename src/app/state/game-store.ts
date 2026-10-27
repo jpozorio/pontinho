@@ -14,6 +14,9 @@ import {
   setAgreement,
 } from '../domain/money';
 
+/** Aviso para a tela mostrar uma vez (ex.: acordo removido por um desfazer/reentrada). */
+export type StoreNotice = 'agreement-dropped';
+
 export const STORAGE_KEY = 'pontinho:v1';
 const LEGACY_VALUE_KEY = 'game-value';
 
@@ -44,6 +47,7 @@ function legacyEntryValue(): number {
 export class GameStore {
   private readonly _data = signal<AppData>(load());
   private readonly _error = signal<ActionError | AgreementError | null>(null);
+  private readonly _notice = signal<StoreNotice | null>(null);
 
   readonly data: Signal<AppData> = this._data.asReadonly();
   readonly game: Signal<Game | null> = computed(() => this._data().current);
@@ -56,6 +60,7 @@ export class GameStore {
     return g ? computeMoney(g, computeDebts(this._data().finished)) : null;
   });
   readonly lastError: Signal<ActionError | AgreementError | null> = this._error.asReadonly();
+  readonly notice: Signal<StoreNotice | null> = this._notice.asReadonly();
 
   constructor() {
     effect(() => {
@@ -99,7 +104,7 @@ export class GameStore {
   }
 
   decide(player: string, d: Decision): boolean {
-    return this.apply((g) => decide(g, player, d));
+    return this.watchAgreement(() => this.apply((g) => decide(g, player, d)));
   }
 
   editRound(index: number, scores: Record<string, Score>): boolean {
@@ -107,7 +112,14 @@ export class GameStore {
   }
 
   undoFrom(index: number): void {
-    this.apply((g) => ({ game: truncateFrom(g, index) }));
+    this.watchAgreement(() => this.apply((g) => ({ game: truncateFrom(g, index) })));
+  }
+
+  /** Devolve e limpa o aviso pendente. */
+  takeNotice(): StoreNotice | null {
+    const n = this._notice();
+    this._notice.set(null);
+    return n;
   }
 
   addPayment(player: string, amount: number): void {
@@ -142,6 +154,14 @@ export class GameStore {
 
   debtsFor(players: string[]): Debt[] {
     return computeDebts(this._data().finished).filter((d) => players.includes(d.debtor));
+  }
+
+  /** Roda a ação e avisa se ela removeu o acordo existente. */
+  private watchAgreement<T>(run: () => T): T {
+    const had = this.game()?.agreement !== undefined;
+    const result = run();
+    if (had && this.game() !== null && this.game()?.agreement === undefined) this._notice.set('agreement-dropped');
+    return result;
   }
 
   /** Aplica uma ação à partida atual; em erro guarda `lastError` e não muda nada. */

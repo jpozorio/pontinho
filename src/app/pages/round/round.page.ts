@@ -12,10 +12,12 @@ import {
   IonSegmentButton,
   IonTitle,
   IonToolbar,
+  ToastController,
 } from '@ionic/angular';
 import { ActionError } from '../../domain/actions';
 import { PlayerView } from '../../domain/engine';
 import { Decision } from '../../domain/model';
+import { showStoreNotice } from '../../shared/notice-toast';
 import { parseAmount } from '../../shared/parse-amount';
 import { GameStore } from '../../state/game-store';
 import { LeftLevel, leftLevel } from './points-left';
@@ -41,6 +43,7 @@ export class RoundPage {
   private readonly store = inject(GameStore);
   private readonly router = inject(Router);
   private readonly alerts = inject(AlertController);
+  private readonly toasts = inject(ToastController);
 
   readonly view = this.store.view;
   readonly money = this.store.money;
@@ -126,10 +129,12 @@ export class RoundPage {
     this.store.setDraftScore(r.p.name, r.draft === 'bust' ? null : 'bust');
   }
 
-  decide(name: string, ev: Event): void {
+  async decide(name: string, ev: Event): Promise<void> {
     const value = (ev as CustomEvent<{ value?: string | number }>).detail?.value;
     this.closeError.set(null);
-    if (value === 'reenter' || value === 'out') this.store.decide(name, value as Decision);
+    if (value !== 'reenter' && value !== 'out') return;
+    this.store.decide(name, value as Decision);
+    await showStoreNotice(this.store, this.toasts);
   }
 
   async close(): Promise<void> {
@@ -176,6 +181,7 @@ export class RoundPage {
       return;
     }
     if (!this.store.decide(p.name, 'reenter')) return;
+    await showStoreNotice(this.store, this.toasts);
     const paid = await this.alerts.create({
       header: 'Pagou agora?',
       backdropDismiss: false,

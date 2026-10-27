@@ -96,6 +96,32 @@ describe('GameStore', () => {
     expect(s.money()?.rows.find((r) => r.player === 'Ana')?.oldDebts.length).toBe(1);
   });
 
+  it('notices when decide or undo drops the agreement, and only then', () => {
+    const s = fresh();
+    s.startGame({ ...config, players: ['Ana', 'Beto', 'Carla', 'Davi'] });
+    for (const [p, v] of [['Ana', 40], ['Beto', 30], ['Carla', 'bust'], ['Davi', 'bust']] as const) s.setDraftScore(p, v);
+    expect(s.closeRound()).toBe(true);
+    s.decide('Davi', 'out');
+    s.decide('Carla', 'out');
+    expect(s.setAgreement({ Ana: 10, Beto: 10 })).toBe(true);
+    expect(s.notice()).toBeNull();
+
+    s.decide('Carla', 'reenter');
+    expect(s.game()!.agreement).toBeUndefined();
+    expect(s.takeNotice()).toBe('agreement-dropped');
+    expect(s.notice()).toBeNull();
+
+    s.decide('Carla', 'out');
+    expect(s.notice()).toBeNull();
+    expect(s.setAgreement({ Ana: 10, Beto: 10 })).toBe(true);
+    s.undoFrom(0);
+    expect(s.game()!.agreement).toBeUndefined();
+    expect(s.takeNotice()).toBe('agreement-dropped');
+
+    s.undoFrom(0);
+    expect(s.takeNotice()).toBeNull();
+  });
+
   it('abandonGame discards without archiving', () => {
     const s = fresh();
     s.startGame(config);
