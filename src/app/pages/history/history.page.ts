@@ -4,6 +4,7 @@ import {
   AlertController,
   IonButton,
   IonContent,
+  IonFooter,
   IonHeader,
   IonTitle,
   IonToolbar,
@@ -23,7 +24,7 @@ interface FooterCell {
 
 @Component({
   selector: 'app-history',
-  imports: [IonButton, IonContent, IonHeader, IonTitle, IonToolbar],
+  imports: [IonButton, IonContent, IonFooter, IonHeader, IonTitle, IonToolbar],
   templateUrl: './history.page.html',
   styleUrl: './history.page.scss',
 })
@@ -96,6 +97,7 @@ export class HistoryPage {
     await a.present();
     if ((await a.onDidDismiss()).role !== 'confirm') return;
     this.store.undoFrom(index);
+    this.message.set(null);
     if (goToRound) await this.router.navigateByUrl('/jogo/rodada');
   }
 }

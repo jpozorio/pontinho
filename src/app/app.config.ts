@@ -8,7 +8,7 @@ export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
     provideZoneChangeDetection({ eventCoalescing: true }),
-    provideIonicAngular({ mode: 'md' }),
+    provideIonicAngular({ mode: 'md', useSetInputAPI: true }),
     provideRouter(routes, withHashLocation()),
   ],
 };

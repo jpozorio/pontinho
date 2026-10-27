@@ -4,7 +4,7 @@
   </ion-toolbar>
 </ion-header>
 
-<ion-content>
+<ion-content [scrollY]="false">
   @if (rounds().length === 0) {
     <p class="empty">Nenhuma rodada fechada ainda</p>
   } @else {
@@ -20,7 +20,14 @@
         </thead>
         <tbody>
           @for (row of rounds(); track $index; let i = $index) {
-            <tr class="round" [attr.data-round]="i + 1" (click)="edit(i)">
+            <tr
+              class="round"
+              role="button"
+              tabindex="0"
+              [attr.data-round]="i + 1"
+              (click)="edit(i)"
+              (keydown.enter)="edit(i)"
+            >
               <th class="rn">{{ i + 1 }}</th>
               @for (c of row; track $index) {
                 <td [class.out]="c.out" [class.bust]="c.busted">
@@ -55,11 +62,16 @@
         </tfoot>
       </table>
     </div>
+  }
+</ion-content>
+
+@if (rounds().length > 0) {
+  <ion-footer>
     @if (message(); as msg) {
       <p class="error" role="alert">{{ msg }}</p>
     }
     <ion-button expand="block" fill="outline" color="danger" class="undo" data-undo (click)="undoLast()">
       Desfazer última rodada
     </ion-button>
-  }
-</ion-content>
+  </ion-footer>
+}
