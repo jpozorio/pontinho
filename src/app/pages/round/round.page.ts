@@ -15,6 +15,7 @@ import {
 import { ActionError } from '../../domain/actions';
 import { PlayerView } from '../../domain/engine';
 import { Decision } from '../../domain/model';
+import { parseAmount } from '../../shared/parse-amount';
 import { GameStore } from '../../state/game-store';
 import { LeftLevel, leftLevel } from './points-left';
 
@@ -168,8 +169,8 @@ export class RoundPage {
     await paid.present();
     const res = await paid.onDidDismiss<{ values?: { amount?: string | number } }>();
     if (res.role === 'confirm') {
-      const amount = Number(String(res.data?.values?.amount ?? '').replace(',', '.'));
-      if (Number.isFinite(amount) && amount > 0) this.store.addPayment(p.name, amount);
+      const amount = parseAmount(res.data?.values?.amount);
+      if (amount !== null) this.store.addPayment(p.name, amount);
     }
   }
 

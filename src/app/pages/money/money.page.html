@@ -1,0 +1,77 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Dinheiro</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  @if (money(); as m) {
+    <div class="bar">
+      <span>Pote <b data-pot>{{ m.pot | currency: 'BRL' }}</b></span>
+      <span data-missing>Falta entrar no pote: <b>{{ m.missingToPot | currency: 'BRL' }}</b></span>
+    </div>
+
+    @for (r of m.rows; track r.player) {
+      <div class="mrow" [attr.data-row]="r.player">
+        <div class="top">
+          <div class="info">
+            <b>{{ r.player }}</b>
+            <span>
+              {{ r.entries }} {{ r.entries === 1 ? 'entrada' : 'entradas' }} · deve {{ r.owes | currency: 'BRL' }} ·
+              pagou {{ r.paidInGame | currency: 'BRL' }}
+            </span>
+            @for (d of r.oldDebts; track d.gameId) {
+              <span class="debt" data-debt>
+                deve {{ d.amount | currency: 'BRL' }} ao {{ d.creditor }} (partida de {{ d.date | date: 'dd/MM' }})
+              </span>
+            }
+            @if (credit(r) > 0) {
+              <span class="credit" data-credit>crédito {{ credit(r) | currency: 'BRL' }}</span>
+            }
+          </div>
+          @if (settled(r)) {
+            <span class="ok" data-ok>ok</span>
+          }
+          <app-pay-button [player]="r.player" [suggested]="suggested(r)" />
+        </div>
+        @if (payments(r.player).length > 0) {
+          <button type="button" class="link" data-toggle (click)="toggle(r.player)">
+            {{ isOpen(r.player) ? 'ocultar' : 'ver' }} pagamentos ({{ payments(r.player).length }})
+          </button>
+          @if (isOpen(r.player)) {
+            <ul class="pays">
+              @for (p of payments(r.player); track p.id) {
+                <li data-payment>
+                  <span>{{ p.at | date: 'dd/MM HH:mm' }} · {{ p.amount | currency: 'BRL' }}</span>
+                  <button type="button" class="link danger" data-remove (click)="removePayment(p.id)">remover</button>
+                </li>
+              }
+            </ul>
+          }
+        }
+      </div>
+    }
+
+    <div class="agree">
+      @if (agreement(); as ag) {
+        <p data-agreement>
+          Acordo:
+          @for (a of ag; track a.name; let last = $last) {
+            {{ a.name }} salva {{ a.amount | currency: 'BRL' }}{{ last ? '' : ' · ' }}
+          }
+        </p>
+        @if (canAgree()) {
+          <button type="button" class="link" data-edit-agreement (click)="openAgreement()">editar</button>
+        }
+        <button type="button" class="link danger" data-remove-agreement (click)="removeAgreement()">remover</button>
+      } @else if (canAgree()) {
+        <ion-button expand="block" fill="outline" data-agreement-button (click)="openAgreement()">
+          Fazer acordo
+        </ion-button>
+      }
+      @if (message(); as msg) {
+        <p class="error" role="alert">{{ msg }}</p>
+      }
+    </div>
+  }
+</ion-content>

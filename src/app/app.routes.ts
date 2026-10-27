@@ -14,7 +14,7 @@ export const routes: Routes = [
       { path: '', pathMatch: 'full', redirectTo: 'rodada' },
       { path: 'rodada', loadComponent: () => import('./pages/round/round.page').then((m) => m.RoundPage) },
       { path: 'historico', loadComponent: () => import('./pages/history/history.page').then((m) => m.HistoryPage) },
-      { path: 'dinheiro', loadComponent: () => import('./pages/game/tab-placeholder').then((m) => m.DinheiroTab) },
+      { path: 'dinheiro', loadComponent: () => import('./pages/money/money.page').then((m) => m.MoneyPage) },
     ],
   },
   {
