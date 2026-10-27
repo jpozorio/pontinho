@@ -46,6 +46,33 @@ export interface AppData {
   lastConfig?: { entryValue: number; reentryLimit: ReentryLimit };
 }
 
+export type Movement =
+  | { id: string; at: string; kind: 'in'; player: string; amount: number }
+  | { id: string; at: string; kind: 'out'; player: string; amount: number }
+  | { id: string; at: string; kind: 'transfer'; from: string; to: string; amount: number };
+
+type DistributiveOmit<T, K extends PropertyKey> = T extends unknown ? Omit<T, K> : never;
+export type NewMovement = DistributiveOmit<Movement, 'id' | 'at'>;
+
+export interface Night {
+  id: string;
+  startedAt: string;
+  games: Game[];
+  movements: Movement[];
+}
+
+export interface Pending {
+  id: string;
+  debtor: string;
+  creditor: string;
+  amount: number;
+  date: string;
+}
+
+export function newNight(now: Date = new Date()): Night {
+  return { id: crypto.randomUUID(), startedAt: now.toISOString(), games: [], movements: [] };
+}
+
 export function newGame(config: GameConfig, now: Date = new Date()): Game {
   return {
     id: crypto.randomUUID(),

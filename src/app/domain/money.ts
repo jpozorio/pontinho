@@ -49,7 +49,7 @@ export interface MoneyView {
 export type AgreementError = 'not-two-players' | 'invalid-amount' | 'exceeds-pot';
 
 /** Arredonda para centavos, eliminando restos de ponto flutuante. */
-const cents = (x: number): number => Math.round(x * 100) / 100;
+export const cents =(x: number): number => Math.round(x * 100) / 100;
 const sum = (xs: number[]): number => cents(xs.reduce((a, b) => a + b, 0));
 
 export function computeMoney(game: Game, priorDebts: Debt[]): MoneyView {
