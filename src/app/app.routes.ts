@@ -12,7 +12,7 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/game/game.page').then((m) => m.GamePage),
     children: [
       { path: '', pathMatch: 'full', redirectTo: 'rodada' },
-      { path: 'rodada', loadComponent: () => import('./pages/game/tab-placeholder').then((m) => m.RodadaTab) },
+      { path: 'rodada', loadComponent: () => import('./pages/round/round.page').then((m) => m.RoundPage) },
       { path: 'historico', loadComponent: () => import('./pages/game/tab-placeholder').then((m) => m.HistoricoTab) },
       { path: 'dinheiro', loadComponent: () => import('./pages/game/tab-placeholder').then((m) => m.DinheiroTab) },
     ],

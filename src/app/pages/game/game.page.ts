@@ -9,15 +9,15 @@ import { IonIcon, IonLabel, IonTabBar, IonTabButton, IonTabs } from '@ionic/angu
   template: `
     <ion-tabs>
       <ion-tab-bar slot="bottom">
-        <ion-tab-button tab="rodada" href="/jogo/rodada">
+        <ion-tab-button tab="rodada">
           <ion-icon name="create-outline" />
           <ion-label>Rodada</ion-label>
         </ion-tab-button>
-        <ion-tab-button tab="historico" href="/jogo/historico">
+        <ion-tab-button tab="historico">
           <ion-icon name="list-outline" />
           <ion-label>Histórico</ion-label>
         </ion-tab-button>
-        <ion-tab-button tab="dinheiro" href="/jogo/dinheiro">
+        <ion-tab-button tab="dinheiro">
           <ion-icon name="cash-outline" />
           <ion-label>Dinheiro</ion-label>
         </ion-tab-button>

@@ -1,0 +1,86 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Rodada {{ view()?.nextRound }}</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  @if (view(); as v) {
+    <div class="bar">
+      <span>baralho: <b>{{ v.dealer }}</b></span>
+      <span>Pote <b>{{ money()?.pot ?? 0 | currency: 'BRL' }}</b></span>
+    </div>
+
+    @for (r of rows(); track r.p.name) {
+      <div class="pcard" [class.grey]="r.grey" [attr.data-row]="r.p.name">
+        <div class="nm">
+          <b>{{ r.p.name }}</b>
+          @if (r.p.playsNextRound) {
+            <span class="totals">
+              @if (r.draft !== null) {
+                {{ r.p.total }} → {{ r.preview === null ? '💥' : r.preview }}
+              } @else {
+                {{ r.p.total }}
+              }
+            </span>
+          }
+          @if (r.p.reentries > 0) {
+            <span class="re">↻ {{ r.p.reentries }}</span>
+          }
+          @if (r.p.status === 'out' || (r.p.status === 'deciding' && !r.p.canReenter)) {
+            <span class="out">saiu</span>
+          } @else if (r.p.status === 'deciding') {
+            <span class="decide">
+              estourou —
+              <ion-segment
+                [value]="r.p.decision ?? null"
+                (ionChange)="decide(r.p.name, $event)"
+                [attr.data-decide]="r.p.name"
+              >
+                <ion-segment-button value="reenter">reentra</ion-segment-button>
+                <ion-segment-button value="out">sai</ion-segment-button>
+              </ion-segment>
+            </span>
+          }
+        </div>
+
+        @if (r.p.playsNextRound) {
+          <ion-input
+            class="inp"
+            type="number"
+            inputmode="numeric"
+            min="0"
+            placeholder="–"
+            [attr.data-player]="r.p.name"
+            [value]="inputValue(r)"
+            [disabled]="r.draft === 'bust'"
+            [class.ion-invalid]="r.invalid"
+            [class.ion-touched]="r.invalid"
+            (ionInput)="onInput(r.p.name, $event)"
+          ></ion-input>
+          <ion-button
+            size="small"
+            shape="round"
+            color="danger"
+            [fill]="r.draft === 'bust' ? 'solid' : 'outline'"
+            (click)="toggleBust(r)"
+          >
+            estourou
+          </ion-button>
+          <div class="left" [class]="'left ' + r.level">
+            @if (r.left === null || r.left < 0) {
+              <b>💥</b>estourou
+            } @else {
+              <b>{{ r.left }}</b>faltam
+            }
+          </div>
+        }
+      </div>
+    }
+
+    @if (errorMessage(); as msg) {
+      <p class="error" role="alert">{{ msg }}</p>
+    }
+    <ion-button expand="block" class="close" data-close (click)="close()">Fechar rodada</ion-button>
+  }
+</ion-content>
