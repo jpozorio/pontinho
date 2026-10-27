@@ -23,7 +23,6 @@ interface Row {
   draft: number | 'bust' | null;
   /** total mostrado com o rascunho; null quando o rascunho é estouro */
   preview: number | null;
-  busted: boolean;
   left: number | null;
   level: LeftLevel;
   grey: boolean;
@@ -44,6 +43,7 @@ export class RoundPage {
   readonly view = this.store.view;
   readonly money = this.store.money;
   private readonly invalidNames = signal<ReadonlySet<string>>(new Set());
+  private readonly closeError = signal<ActionError | null>(null);
 
   readonly rows = computed<Row[]>(() => {
     const v = this.view();
@@ -53,13 +53,11 @@ export class RoundPage {
     return v.players.map((p) => {
       const draft = p.playsNextRound ? (g.draft[p.name] ?? null) : null;
       const preview = typeof draft === 'number' ? p.total + draft : draft === null ? p.total : null;
-      const left = preview === null ? null : 99 - preview;
-      const busted = left === null || left < 0;
+      const left = typeof draft === 'number' ? p.pointsLeft - draft : draft === 'bust' ? null : p.pointsLeft;
       return {
         p,
         draft,
         preview,
-        busted,
         left,
         level: left === null ? 'bust' : leftLevel(left),
         grey: p.status === 'out' || (p.status === 'deciding' && p.decision !== 'reenter'),
@@ -69,9 +67,9 @@ export class RoundPage {
   });
 
   readonly errorMessage = computed(() => {
-    const e = this.store.lastError();
+    const e = this.closeError();
     const v = this.view();
-    switch (e as ActionError | null) {
+    switch (e) {
       case 'missing-scores':
         return 'Lance os pontos de todos';
       case 'all-bust':
@@ -109,10 +107,13 @@ export class RoundPage {
       this.store.setDraftScore(name, Number(raw));
     } else {
       mark(true);
+      this.store.setDraftScore(name, null);
     }
+    this.closeError.set(null);
   }
 
   toggleBust(r: Row): void {
+    this.closeError.set(null);
     this.invalidNames.update((s) => {
       const next = new Set(s);
       next.delete(r.p.name);
@@ -123,11 +124,18 @@ export class RoundPage {
 
   decide(name: string, ev: Event): void {
     const value = (ev as CustomEvent<{ value?: string | number }>).detail?.value;
+    this.closeError.set(null);
     if (value === 'reenter' || value === 'out') this.store.decide(name, value as Decision);
   }
 
   async close(): Promise<void> {
-    if (!this.store.closeRound()) return;
+    if (!this.store.closeRound()) {
+      const e = this.store.lastError();
+      this.closeError.set(e as ActionError | null);
+      return;
+    }
+    this.closeError.set(null);
+    this.invalidNames.set(new Set());
     const v = this.view();
     if (v?.winner) {
       await this.router.navigateByUrl('/fim');
@@ -147,11 +155,11 @@ export class RoundPage {
       if (choice === 'out') this.store.decide(p.name, 'out');
       return;
     }
-    this.store.decide(p.name, 'reenter');
+    if (!this.store.decide(p.name, 'reenter')) return;
     const paid = await this.alerts.create({
       header: 'Pagou agora?',
       backdropDismiss: false,
-      inputs: [{ name: 'amount', type: 'number', value: entry, min: 0 }],
+      inputs: [{ name: 'amount', type: 'text', value: String(entry) }],
       buttons: [
         { text: 'Não', role: 'cancel' },
         { text: 'Pagou', role: 'confirm' },
@@ -160,7 +168,7 @@ export class RoundPage {
     await paid.present();
     const res = await paid.onDidDismiss<{ values?: { amount?: string | number } }>();
     if (res.role === 'confirm') {
-      const amount = Number(res.data?.values?.amount);
+      const amount = Number(String(res.data?.values?.amount ?? '').replace(',', '.'));
       if (Number.isFinite(amount) && amount > 0) this.store.addPayment(p.name, amount);
     }
   }

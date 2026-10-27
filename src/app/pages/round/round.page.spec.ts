@@ -57,4 +57,40 @@ describe('RoundPage', () => {
     fixture.detectChanges();
     expect(el.textContent).toContain('Lance os pontos de todos');
   });
+
+  it('drops a stale draft when the input becomes invalid, and refuses to close', () => {
+    const { store, fixture, el } = setup();
+    type(el, 'Ana', '12');
+    type(el, 'Ana', '12.5');
+    fixture.detectChanges();
+    expect(store.game()!.draft['Ana']).toBeUndefined();
+    expect(el.querySelector('[data-row="Ana"] .left b')!.textContent!.trim()).toBe('21');
+    type(el, 'Beto', '1');
+    type(el, 'Carla', '1');
+    (el.querySelector('[data-close]') as HTMLElement).click();
+    fixture.detectChanges();
+    expect(store.game()!.rounds.length).toBe(1);
+    expect(el.textContent).toContain('Lance os pontos de todos');
+  });
+
+  it('previews a reentering player from the reentry total', () => {
+    localStorage.clear();
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({ providers: [provideIonicAngular({ mode: 'md' }), provideRouter([])] });
+    const store = TestBed.inject(GameStore);
+    store.startGame({ entryValue: 5, reentryLimit: 'unlimited', players: ['Ana', 'Beto', 'Carla'] });
+    store.setDraftScore('Ana', 'bust');
+    store.setDraftScore('Beto', 10);
+    store.setDraftScore('Carla', 20);
+    expect(store.closeRound()).toBe(true);
+    expect(store.decide('Ana', 'reenter')).toBe(true);
+    const fixture = TestBed.createComponent(RoundPage);
+    fixture.detectChanges();
+    const el = fixture.nativeElement as HTMLElement;
+    type(el, 'Ana', '5');
+    fixture.detectChanges();
+    const row = el.querySelector('[data-row="Ana"]')!.textContent!;
+    expect(row).toContain('20 → 25');
+    expect(el.querySelector('[data-row="Ana"] .left b')!.textContent!.trim()).toBe('74');
+  });
 });
