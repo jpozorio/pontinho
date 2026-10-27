@@ -49,7 +49,10 @@ export class PayButton {
     const res = await alert.onDidDismiss<{ values?: { amount?: string | number } }>();
     if (res.role !== 'confirm') return;
     const amount = parseAmount(res.data?.values?.amount);
-    if (amount === null) return;
+    if (amount === null) {
+      this.failed.emit('invalid-amount');
+      return;
+    }
     const ok =
       this.kind() === 'in' ? this.store.payIn(this.player(), amount) : this.store.payOut(this.player(), amount);
     const e = this.store.lastError();

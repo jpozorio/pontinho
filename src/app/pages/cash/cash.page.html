@@ -13,7 +13,9 @@
   @if (cash(); as c) {
     <div class="top">
       <span>Dinheiro no caixa <b data-cash>{{ c.cash | currency: 'BRL' }}</b></span>
-      <small data-games>{{ c.games === 1 ? '1 partida na noite' : c.games + ' partidas na noite' }}</small>
+      @if (c.games > 0) {
+        <small data-games>{{ c.games === 1 ? '1 partida encerrada na noite' : c.games + ' partidas encerradas na noite' }}</small>
+      }
     </div>
 
     @if (playing() && money(); as m) {

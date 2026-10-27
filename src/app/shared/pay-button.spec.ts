@@ -41,11 +41,14 @@ describe('PayButton', () => {
 
   it('does nothing on invalid input', async () => {
     const { store, fixture, answer } = setup(10);
+    const failed: string[] = [];
+    fixture.componentInstance.failed.subscribe((e) => failed.push(e));
     for (const v of ['abc', '', '0', '-2']) {
       answer('confirm', v);
       await fixture.componentInstance.open();
     }
     expect(store.night()!.movements).toEqual([]);
+    expect(failed).toEqual(['invalid-amount', 'invalid-amount', 'invalid-amount', 'invalid-amount']);
   });
 
   it('kind "out" pays out of the cash and reports a refusal', async () => {

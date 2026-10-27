@@ -180,7 +180,7 @@ describe('CashPage cash box', () => {
   it('shows cash, games and each player balance (deve / tem a receber / acertado)', () => {
     const { store, fixture, el } = setup(['Ana', 'Beto', 'Carla']);
     expect(text(el.querySelector('[data-cash]'))).toContain('R$ 0,00');
-    expect(text(el.querySelector('[data-games]'))).toBe('0 partidas na noite');
+    expect(el.querySelector('[data-games]')).toBeNull();
     expect(text(el.querySelector('[data-row="Beto"] [data-balance]'))).toBe('deve R$ 5,00');
     store.payIn('Beto', 5);
     store.payIn('Carla', 8);
@@ -188,6 +188,23 @@ describe('CashPage cash box', () => {
     expect(text(el.querySelector('[data-row="Beto"] [data-balance]'))).toBe('acertado');
     expect(text(el.querySelector('[data-row="Carla"] [data-balance]'))).toBe('tem a receber R$ 3,00');
     expect(text(el.querySelector('[data-cash]'))).toContain('R$ 13,00');
+  });
+
+  it('counts only finished games, singular and plural', () => {
+    const { store, fixture, el } = setup(['Ana', 'Beto']);
+    const finish = () => {
+      store.setDraftScore('Ana', 'bust');
+      store.setDraftScore('Beto', 5);
+      store.closeRound();
+      store.archiveFinished();
+    };
+    finish();
+    fixture.detectChanges();
+    expect(text(el.querySelector('[data-games]'))).toBe('1 partida encerrada na noite');
+    store.startGame({ entryValue: 5, reentryLimit: 'unlimited', players: ['Ana', 'Beto'] });
+    finish();
+    fixture.detectChanges();
+    expect(text(el.querySelector('[data-games]'))).toBe('2 partidas encerradas na noite');
   });
 
   it('"pagou ao caixa" suggests what is owed and calls payIn', async () => {
