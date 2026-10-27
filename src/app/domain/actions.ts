@@ -103,8 +103,15 @@ function dropStaleAgreement(game: Game): Game {
   return rest;
 }
 
+/** Reabre a partida na rodada `index`; os pontos dela voltam como rascunho para quem a joga. */
 export function truncateFrom(game: Game, index: number): Game {
   if (index < 0 || index >= game.rounds.length) return game;
   const { finishedAt: _finished, ...rest } = game;
-  return dropStaleAgreement({ ...rest, rounds: game.rounds.slice(0, index), draft: {} });
+  const reopened: Game = { ...rest, rounds: game.rounds.slice(0, index), draft: {} };
+  const draft: Record<string, Score> = {};
+  for (const p of computeGame(reopened).players) {
+    const score = game.rounds[index].scores[p.name];
+    if (p.playsNextRound && score !== undefined) draft[p.name] = score;
+  }
+  return dropStaleAgreement({ ...reopened, draft });
 }

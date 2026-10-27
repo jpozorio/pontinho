@@ -137,7 +137,7 @@ describe('actions', () => {
     const t = truncateFrom(g, 0);
     expect(t.rounds).toEqual([]);
     expect(t.finishedAt).toBeUndefined();
-    expect(t.draft).toEqual({});
+    expect(t.draft).toEqual({ Ana: 10, Beto: 'bust', Carla: 100 });
     expect(t.agreement).toBeUndefined();
     expect(g.finishedAt).toBeDefined();
   });
@@ -146,6 +146,22 @@ describe('actions', () => {
     const rounds = [round({ Ana: 10, Beto: 20, Carla: 'bust' }, { Carla: 'out' }), round({ Ana: 1, Beto: 1 })];
     const g: Game = { ...game(rounds), agreement: { saves: { Ana: 1, Beto: 1 } } };
     expect(truncateFrom(g, 1).agreement).toBeDefined();
+  });
+
+  it('truncateFrom puts the reopened round back as draft, only for who plays it', () => {
+    const rounds = [
+      round({ Ana: 10, Beto: 'bust', Carla: 'bust', Davi: 20 }, { Beto: 'reenter', Carla: 'out' }),
+      round({ Ana: 7, Beto: 3, Davi: 5 }),
+      round({ Ana: 1, Beto: 2, Davi: 1 }),
+    ];
+    const g = game(rounds, { Ana: 50 }, four);
+    const t = truncateFrom(g, 1);
+    expect(t.rounds.length).toBe(1);
+    expect(t.draft).toEqual({ Ana: 7, Beto: 3, Davi: 5 });
+    expect(ok(closeRound(t)).rounds[1].scores).toEqual({ Ana: 7, Beto: 3, Davi: 5 });
+    // se a decisão mudou, quem não joga mais a rodada reaberta não fica no rascunho
+    const changed: Game = { ...g, rounds: [{ ...rounds[0], decisions: { Carla: 'out' } }, ...rounds.slice(1)] };
+    expect(truncateFrom(changed, 1).draft).toEqual({ Ana: 7, Davi: 5 });
   });
 
   it('truncateFrom out of range returns the game unchanged', () => {
