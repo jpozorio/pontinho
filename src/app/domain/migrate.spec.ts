@@ -87,4 +87,64 @@ describe('migrate', () => {
     expect(migrate(JSON.parse(JSON.stringify(data)))).toEqual(data);
     expect(migrate({ version: 2 })).toEqual({ version: 2, current: null, night: null, pendings: [] });
   });
+
+  it('folds finished and current together, movements in time order', () => {
+    const early = won('early', '2026-10-27T19:00:00.000Z', '2026-10-27T19:30:00.000Z');
+    early.payments = [{ id: 'p2', player: 'Ana', amount: 5, at: '2026-10-27T19:20:00.000Z' }];
+    const current = v1Game('cur', '2026-10-27T20:00:00.000Z', {
+      payments: [{ id: 'p3', player: 'Beto', amount: 5, at: '2026-10-27T20:01:00.000Z' }],
+    });
+    const late = won('late', '2026-10-27T18:00:00.000Z', '2026-10-27T19:50:00.000Z');
+    late.payments = [{ id: 'p1', player: 'Carla', amount: 5, at: '2026-10-27T18:10:00.000Z' }];
+    const data = migrate({ version: 1, current, finished: [late, early] });
+    expect(data.current!.id).toBe('cur');
+    expect(data.night!.games.map((g) => g.id)).toEqual(['early', 'late']);
+    expect(data.night!.movements.map((m) => m.id)).toEqual(['p1', 'p2', 'p3']);
+    expect(data.night!.startedAt).toBe('2026-10-27T18:00:00.000Z');
+    expect(data.lastFinished!.id).toBe('late');
+  });
+
+  it('keeps the valid games of a malformed v1 list', () => {
+    const ok = won('ok', '2026-10-27T19:00:00.000Z', '2026-10-27T19:30:00.000Z');
+    const noDates = { ...won('nodates', '', ''), startedAt: undefined, finishedAt: undefined };
+    const raw = { version: 1, current: null, finished: [null, 'x', { id: 'bad' }, noDates, ok] };
+    const data = migrate(raw);
+    expect(data.night!.games.map((g) => g.id)).toEqual(['nodates', 'ok']);
+    expect(data.night!.startedAt).toBe('2026-10-27T19:00:00.000Z');
+  });
+
+  it('skips malformed payments without throwing', () => {
+    const current = {
+      ...v1Game('g1', '2026-10-27T20:00:00.000Z'),
+      payments: [
+        { player: 'Ana', amount: 5 },
+        { id: 'x', at: '2026-10-27T20:01:00.000Z', amount: 5 },
+        { id: 'y', at: '2026-10-27T20:02:00.000Z', player: 'Beto', amount: -1 },
+        { id: 'z', at: '2026-10-27T20:03:00.000Z', player: 'Beto', amount: 'five' },
+        null,
+      ],
+    };
+    const other = { ...won('w', '2026-10-27T19:00:00.000Z', '2026-10-27T19:30:00.000Z'), payments: {} };
+    const data = migrate({ version: 1, current, finished: [other] });
+    expect(data.night!.movements).toMatchObject([{ kind: 'in', player: 'Ana', amount: 5, at: '' }]);
+    expect(typeof data.night!.movements[0].id).toBe('string');
+  });
+
+  it('drops a current game that is not a game', () => {
+    for (const current of ['x', 42, { id: 'g' }, { id: 'g', config: { players: 'no' }, rounds: [] }]) {
+      expect(migrate({ version: 1, current, finished: [] }).current).toBeNull();
+      expect(migrate({ version: 2, current, night: null, pendings: [] }).current).toBeNull();
+    }
+  });
+
+  it('replaces non-array fields of v2 with empty lists', () => {
+    const data = migrate({
+      version: 2,
+      current: null,
+      night: { id: 'n1', startedAt: '2026-10-27T19:00:00.000Z', games: 'no', movements: { a: 1 } },
+      pendings: 'x',
+    });
+    expect(data.night).toEqual({ id: 'n1', startedAt: '2026-10-27T19:00:00.000Z', games: [], movements: [] });
+    expect(data.pendings).toEqual([]);
+  });
 });

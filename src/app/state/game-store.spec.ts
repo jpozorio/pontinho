@@ -2,7 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
 import { gameGuard, startGuard } from '../start.guard';
 import { GameConfig } from '../domain/model';
-import { GameStore, STORAGE_KEY } from './game-store';
+import { BACKUP_KEY, GameStore, STORAGE_KEY } from './game-store';
 
 const config: GameConfig = { entryValue: 5, reentryLimit: 'unlimited', players: ['Ana', 'Beto', 'Carla'] };
 
@@ -251,6 +251,41 @@ describe('GameStore', () => {
     expect(s.payIn('Ana', 5)).toBe(false);
     expect(s.closeNight()).toBe(false);
     expect(s.night()).toBeNull();
+  });
+
+  it('backs up the stored v1 before overwriting it, only once', () => {
+    const v1 = JSON.stringify({ version: 1, current: null, finished: [null] });
+    localStorage.setItem(STORAGE_KEY, v1);
+    const s = fresh();
+    expect(s.night()).toBeNull();
+    TestBed.tick();
+    expect(localStorage.getItem(BACKUP_KEY)).toBe(v1);
+    localStorage.setItem(STORAGE_KEY, '{oops');
+    fresh();
+    expect(localStorage.getItem(BACKUP_KEY)).toBe(v1);
+  });
+
+  it('backs up unreadable data and does not back up v2', () => {
+    localStorage.setItem(STORAGE_KEY, '{oops');
+    fresh();
+    expect(localStorage.getItem(BACKUP_KEY)).toBe('{oops');
+    localStorage.clear();
+    const s = fresh();
+    s.startGame(config);
+    TestBed.tick();
+    fresh();
+    expect(localStorage.getItem(BACKUP_KEY)).toBeNull();
+  });
+
+  it('archiveFinished puts the game in a night even without one', () => {
+    const s = fresh();
+    s.startGame(config);
+    finishWithCarla(s);
+    const g = s.game()!;
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...s.data(), night: null }));
+    const t = fresh();
+    expect(t.archiveFinished()).toBe(true);
+    expect(t.night()!.games).toEqual([g]);
   });
 
   it('migrates stored v1 on load', () => {

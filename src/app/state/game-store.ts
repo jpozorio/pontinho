@@ -22,14 +22,29 @@ import { AgreementError, GameMoney, clearAgreement, computeMoney, setAgreement }
 export type StoreNotice = 'agreement-dropped';
 
 export const STORAGE_KEY = 'pontinho:v1';
+/** Cópia do dado original antes da primeira migração/descarte (nunca sobrescrita). */
+export const BACKUP_KEY = 'pontinho:v1-backup';
 const LEGACY_VALUE_KEY = 'game-value';
 
 function load(): AppData {
+  let raw: string | null = null;
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    return migrate(raw === null ? null : JSON.parse(raw));
+    raw = localStorage.getItem(STORAGE_KEY);
+    if (raw === null) return migrate(null);
+    const parsed: unknown = JSON.parse(raw);
+    if ((parsed as { version?: unknown } | null)?.version !== 2) backup(raw);
+    return migrate(parsed);
   } catch {
+    if (raw !== null) backup(raw);
     return migrate(null);
+  }
+}
+
+function backup(raw: string): void {
+  try {
+    if (localStorage.getItem(BACKUP_KEY) === null) localStorage.setItem(BACKUP_KEY, raw);
+  } catch {
+    // sem espaço: segue sem cópia
   }
 }
 
@@ -192,7 +207,7 @@ export class GameStore {
     this._data.update((d) => ({
       ...d,
       current: null,
-      night: d.night ? { ...d.night, games: [...d.night.games, g] } : null,
+      night: { ...(d.night ?? newNight()), games: [...(d.night?.games ?? []), g] },
       lastFinished: g,
     }));
     return true;
