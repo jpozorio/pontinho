@@ -48,14 +48,16 @@ export interface MoneyView {
 
 export type AgreementError = 'not-two-players' | 'invalid-amount' | 'exceeds-pot';
 
-const sum = (xs: number[]): number => xs.reduce((a, b) => a + b, 0);
+/** Arredonda para centavos, eliminando restos de ponto flutuante. */
+const cents = (x: number): number => Math.round(x * 100) / 100;
+const sum = (xs: number[]): number => cents(xs.reduce((a, b) => a + b, 0));
 
 export function computeMoney(game: Game, priorDebts: Debt[]): MoneyView {
   const view = computeGame(game);
 
   const rows = view.players.map((p): MoneyRow => {
     const entries = 1 + p.reentries;
-    const owes = entries * game.config.entryValue;
+    const owes = cents(entries * game.config.entryValue);
     let paid = sum(game.payments.filter((x) => x.player === p.name).map((x) => x.amount));
     const oldDebts: Debt[] = [];
     const mine = priorDebts
@@ -63,15 +65,16 @@ export function computeMoney(game: Game, priorDebts: Debt[]): MoneyView {
       .sort((a, b) => a.date.localeCompare(b.date));
     for (const d of mine) {
       const used = Math.min(paid, d.amount);
-      paid -= used;
-      if (d.amount - used > 0) oldDebts.push({ ...d, amount: d.amount - used });
+      paid = cents(paid - used);
+      const left = cents(d.amount - used);
+      if (left > 0) oldDebts.push({ ...d, amount: left });
     }
     return {
       player: p.name,
       entries,
       owes,
       paidInGame: paid,
-      outstanding: Math.max(0, owes - paid),
+      outstanding: Math.max(0, cents(owes - paid)),
       oldDebts,
     };
   });
@@ -105,7 +108,9 @@ export function computeMoney(game: Game, priorDebts: Debt[]): MoneyView {
 
 export function computeDebts(finished: Game[]): Debt[] {
   let open: Debt[] = [];
-  for (const g of finished) {
+  const when = (g: Game): string => g.finishedAt ?? g.startedAt;
+  const ordered = [...finished].sort((a, b) => when(a).localeCompare(when(b)));
+  for (const g of ordered) {
     const winner = computeGame(g).winner;
     if (winner === null) continue;
     const money = computeMoney(g, open);

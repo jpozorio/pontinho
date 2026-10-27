@@ -166,4 +166,27 @@ describe('money', () => {
     expect(debts.length).toBe(2);
     expect(debts.map((d) => d.gameId)).toEqual([g1.id, g2.id]);
   });
+
+  it('floating-point leftovers do not create phantom debts', () => {
+    let g = game(
+      [
+        round({ Ana: 10, Beto: 10, Carla: 10, Davi: 'bust' }, { Davi: 'out' }),
+        round({ Ana: 'bust', Beto: 'bust', Carla: 5 }),
+      ],
+      four,
+      0.9,
+    );
+    g = pay(pay(pay(g, 'Ana', 0.1), 'Ana', 0.1), 'Ana', 0.7);
+    g = pay(pay(pay(g, 'Beto', 0.9), 'Carla', 0.9), 'Davi', 0.9);
+    const m = computeMoney(g, []);
+    expect(m.rows.find((r) => r.player === 'Ana')!.outstanding).toBe(0);
+    expect(m.missingToPot).toBe(0);
+    expect(computeDebts([finished(g, '2026-01-01T12:00:00.000Z')])).toEqual([]);
+  });
+
+  it('computeDebts does not depend on input order', () => {
+    const g1 = finished(davisWin(), '2026-01-01T12:00:00.000Z');
+    const g2 = finished(pay(davisWin(), 'Beto', 2), '2026-01-02T12:00:00.000Z');
+    expect(computeDebts([g2, g1])).toEqual(computeDebts([g1, g2]));
+  });
 });
