@@ -48,6 +48,26 @@ describe('PayButton', () => {
     expect(store.night()!.movements).toEqual([]);
   });
 
+  it('kind "out" pays out of the cash and reports a refusal', async () => {
+    const { store, fixture, answer } = setup(0);
+    fixture.componentRef.setInput('kind', 'out');
+    fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).toContain('recebeu do caixa');
+    const failed: string[] = [];
+    fixture.componentInstance.failed.subscribe((e) => failed.push(e));
+    answer('confirm', '2');
+    await fixture.componentInstance.open();
+    expect(store.night()!.movements).toEqual([]);
+    expect(failed).toEqual(['exceeds-cash']);
+    store.payIn('Ana', 5);
+    answer('confirm', '2');
+    await fixture.componentInstance.open();
+    expect(store.night()!.movements.map((m) => [m.kind, 'player' in m && m.player, m.amount])).toEqual([
+      ['in', 'Ana', 5],
+      ['out', 'Ana', 2],
+    ]);
+  });
+
   it('prefills the suggested value with a comma, or empty when nothing is owed', async () => {
     const a = setup(7.5);
     a.answer('cancel');

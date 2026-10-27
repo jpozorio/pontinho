@@ -1,0 +1,104 @@
+<ion-header>
+  <ion-toolbar>
+    @if (!inTab) {
+      <ion-buttons slot="start">
+        <ion-back-button defaultHref="/" text="" />
+      </ion-buttons>
+    }
+    <ion-title>Caixa</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  @if (cash(); as c) {
+    <div class="top">
+      <span>Dinheiro no caixa <b data-cash>{{ c.cash | currency: 'BRL' }}</b></span>
+      <small data-games>{{ c.games === 1 ? '1 partida na noite' : c.games + ' partidas na noite' }}</small>
+    </div>
+
+    @if (playing() && money(); as m) {
+      <section data-current>
+        <h2>Partida atual</h2>
+        <p>Pote <b data-pot>{{ m.pot | currency: 'BRL' }}</b></p>
+        @if (agreement(); as ag) {
+          <p data-agreement>
+            Acordo:
+            @for (a of ag; track a.name; let last = $last) {
+              {{ a.name }} salva {{ a.amount | currency: 'BRL' }}{{ last ? '' : ' · ' }}
+            }
+          </p>
+          @if (canAgree()) {
+            <button type="button" class="link" data-edit-agreement (click)="openAgreement()">editar</button>
+          }
+          <button type="button" class="link danger" data-remove-agreement (click)="removeAgreement()">remover</button>
+        } @else if (canAgree()) {
+          <ion-button expand="block" fill="outline" data-agreement-button (click)="openAgreement()">
+            Fazer acordo
+          </ion-button>
+        }
+      </section>
+    }
+
+    <section>
+      <h2>Jogadores</h2>
+      @for (r of rows(); track r.player) {
+        <div class="mrow" [attr.data-row]="r.player">
+          <div class="info">
+            <b>{{ r.player }}</b>
+            @if (r.balance < 0) {
+              <span class="debt" data-balance>deve {{ -r.balance | currency: 'BRL' }}</span>
+            } @else if (r.balance > 0) {
+              <span class="credit" data-balance>tem a receber {{ r.balance | currency: 'BRL' }}</span>
+            } @else {
+              <span class="ok" data-balance>acertado</span>
+            }
+          </div>
+          <div class="actions">
+            <app-pay-button [player]="r.player" [suggested]="suggested(r)" (failed)="raise($event)" />
+            <app-pay-button
+              [player]="r.player"
+              kind="out"
+              [suggested]="suggestedOut(r)"
+              (failed)="raise($event)"
+            />
+            <ion-button size="small" shape="round" fill="outline" data-transfer (click)="openTransfer(r)"
+              >pagou a…</ion-button
+            >
+          </div>
+        </div>
+      }
+    </section>
+
+    @if (message(); as msg) {
+      <p class="error" role="alert">{{ msg }}</p>
+    }
+
+    @if (movements().length) {
+      <section>
+        <h2>Movimentos</h2>
+        @for (m of movements(); track m.id) {
+          <div class="move" data-movement>
+            <span data-text>{{ describe(m) }} · {{ m.at | date: 'HH:mm' }}</span>
+            <button type="button" class="link danger" data-remove-movement (click)="removeMovement(m.id)">
+              remover
+            </button>
+          </div>
+        }
+      </section>
+    }
+  } @else {
+    <p class="empty" data-no-night>Nenhuma noite em andamento</p>
+  }
+
+  @if (pendings().length) {
+    <section data-pendings>
+      <h2>Pendências</h2>
+      @for (p of pendings(); track p.id) {
+        <div class="move" data-pending>
+          <span data-text>{{ p.debtor }} deve {{ p.amount | currency: 'BRL' }} a {{ p.creditor }} (noite de {{ p.date | date: 'dd/MM' }})</span>
+          <button type="button" class="link" data-settle (click)="settle(p.id)">pago</button>
+        </div>
+      }
+    </section>
+  }
+</ion-content>

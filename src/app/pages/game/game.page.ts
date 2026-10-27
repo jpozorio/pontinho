@@ -17,9 +17,9 @@ import { IonIcon, IonLabel, IonTabBar, IonTabButton, IonTabs } from '@ionic/angu
           <ion-icon name="list-outline" />
           <ion-label>Histórico</ion-label>
         </ion-tab-button>
-        <ion-tab-button tab="dinheiro">
+        <ion-tab-button tab="caixa">
           <ion-icon name="cash-outline" />
-          <ion-label>Dinheiro</ion-label>
+          <ion-label>Caixa</ion-label>
         </ion-tab-button>
       </ion-tab-bar>
     </ion-tabs>
