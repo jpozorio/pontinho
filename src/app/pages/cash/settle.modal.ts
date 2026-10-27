@@ -1,4 +1,4 @@
-import { CurrencyPipe } from '@angular/common';
+import { CurrencyPipe, formatCurrency } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
 import {
   AlertController,
@@ -21,7 +21,14 @@ const CASH_MESSAGES: Partial<Record<CashError, string>> = {
   'same-player': 'Escolha outro jogador',
 };
 
-const brl = (n: number): string => 'R$ ' + n.toFixed(2).replace('.', ',');
+const brl = (n: number): string => formatCurrency(n, 'pt-BR', 'R$', 'BRL');
+
+/** o message do alert é renderizado como HTML: nomes digitados pelo usuário precisam ser escapados */
+const escapeHtml = (s: string): string =>
+  s.replace(
+    /[&<>"']/g,
+    (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c] as string,
+  );
 
 @Component({
   selector: 'app-settle-modal',
@@ -132,10 +139,10 @@ export class SettleModal {
     if (!night || !this.canClose()) return;
     const preview = closeNight(night, this.store.game());
     if ('error' in preview) return;
-    const lines = preview.pendings.map((p) => `${p.debtor} deve ${brl(p.amount)} a ${p.creditor}`);
+    const lines = preview.pendings.map((p) => `${escapeHtml(p.debtor)} deve ${brl(p.amount)} a ${escapeHtml(p.creditor)}`);
     const alert = await this.alerts.create({
       header: 'Fechar a noite?',
-      message: lines.length ? lines.join('\n') : 'Ninguém fica devendo.',
+      message: lines.length ? lines.join('<br>') : 'Ninguém fica devendo.',
       buttons: [
         { text: 'Cancelar', role: 'cancel' },
         { text: 'Fechar', role: 'confirm' },

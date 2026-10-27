@@ -75,7 +75,7 @@ describe('SettleModal', () => {
     await fixture.componentInstance.close();
     const opts = alertCreate.mock.calls[0][0]!;
     expect(opts.header).toBe('Fechar a noite?');
-    expect(opts.message).toBe('Carla deve R$ 5,00 a Ana');
+    expect(opts.message).toBe('Carla deve R$\u00a05,00 a Ana');
     expect(store.night()).toBeNull();
     expect(store.pendings().map((p) => [p.debtor, p.creditor, p.amount])).toEqual([['Carla', 'Ana', 5]]);
     expect(dismiss).toHaveBeenCalled();
@@ -87,9 +87,36 @@ describe('SettleModal', () => {
     finish(store);
     store.payIn('Beto', 5);
     store.payOut('Ana', 5);
-    vi.spyOn(TestBed.inject(AlertController), 'create').mockResolvedValue(fake('cancel') as never);
+    const create = vi.spyOn(TestBed.inject(AlertController), 'create').mockResolvedValue(fake('cancel') as never);
     await fixture.componentInstance.close();
+    expect(create).toHaveBeenCalledTimes(1);
     expect(store.night()).not.toBeNull();
+  });
+
+  it('puts each pending on its own line', async () => {
+    const { store, fixture } = setup();
+    finish(store);
+    const create = vi.spyOn(TestBed.inject(AlertController), 'create').mockResolvedValue(fake('cancel') as never);
+    await fixture.componentInstance.close();
+    expect(create.mock.calls[0][0]!.message).toBe('Beto deve R$\u00a05,00 a Ana<br>Carla deve R$\u00a05,00 a Ana');
+  });
+
+  it('escapes player names in the confirmation', async () => {
+    localStorage.clear();
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({
+      providers: [{ provide: LOCALE_ID, useValue: 'pt-BR' }, provideIonicAngular({ mode: 'md', useSetInputAPI: true })],
+    });
+    const store = TestBed.inject(GameStore);
+    store.startGame({ entryValue: 5, reentryLimit: 'unlimited', players: ['Ana', '<b>Beto</b>'] });
+    store.setDraftScore('Ana', 5);
+    store.setDraftScore('<b>Beto</b>', 'bust');
+    store.closeRound();
+    const fixture = TestBed.createComponent(SettleModal);
+    fixture.detectChanges();
+    const create = vi.spyOn(TestBed.inject(AlertController), 'create').mockResolvedValue(fake('cancel') as never);
+    await fixture.componentInstance.close();
+    expect(create.mock.calls[0][0]!.message).toBe('&lt;b&gt;Beto&lt;/b&gt; deve R$\u00a05,00 a Ana');
   });
 
   it('says nobody owes when the night is already even', async () => {
