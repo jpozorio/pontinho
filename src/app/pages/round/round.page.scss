@@ -1,3 +1,71 @@
+ion-title.fresh {
+  animation: title-glow 1.2s ease 2;
+}
+
+/* confirmação da rodada recém-fechada */
+.closed {
+  margin: 12px 8px 4px;
+  padding: 12px;
+  border-radius: 14px;
+  border: 2px solid var(--pp-gold);
+  background: var(--pp-card);
+  color: var(--pp-ink);
+  box-shadow: var(--pp-shadow);
+  animation: closed-in 0.45s cubic-bezier(0.2, 0.9, 0.3, 1.3);
+
+  .head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    > div {
+      flex: 1;
+      min-width: 0;
+    }
+
+    b {
+      display: block;
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: var(--pp-ok);
+    }
+
+    span {
+      font-size: 0.9rem;
+      color: var(--pp-muted);
+    }
+  }
+
+  .ok {
+    font-size: 2rem;
+    line-height: 1;
+  }
+
+  .dismiss {
+    padding: 6px 14px;
+    border: 1px solid var(--pp-ok);
+    border-radius: 16px;
+    background: none;
+    font-weight: 700;
+    color: var(--pp-ok);
+  }
+
+  .sum {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 12px;
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px dashed #c9c2ad;
+    font-size: 0.9rem;
+
+    .bust {
+      color: var(--pp-bust);
+      font-weight: 700;
+    }
+  }
+}
+
 .bar {
   display: flex;
   flex-wrap: wrap;
@@ -174,6 +242,23 @@
   }
 }
 
+@keyframes closed-in {
+  0% {
+    opacity: 0;
+    transform: translateY(-16px) scale(0.96);
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes title-glow {
+  50% {
+    color: var(--pp-gold-light);
+  }
+}
+
 @keyframes near-pulse {
   0%,
   100% {
@@ -187,6 +272,8 @@
 @media (prefers-reduced-motion: reduce) {
   .pcard,
   .pcard.busting,
+  .closed,
+  ion-title.fresh,
   .left.near b {
     animation: none;
     transition: none;

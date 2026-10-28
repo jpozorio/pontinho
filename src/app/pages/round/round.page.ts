@@ -1,5 +1,5 @@
 import { CurrencyPipe } from '@angular/common';
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal, viewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import {
   AlertController,
@@ -14,7 +14,7 @@ import {
 } from '@ionic/angular';
 import { ActionError } from '../../domain/actions';
 import { PlayerView } from '../../domain/engine';
-import { Decision } from '../../domain/model';
+import { Decision, Score } from '../../domain/model';
 import { showStoreNotice } from '../../shared/notice-toast';
 import { parseAmount } from '../../shared/parse-amount';
 import { GameStore } from '../../state/game-store';
@@ -29,6 +29,12 @@ interface Row {
   level: LeftLevel;
   grey: boolean;
   invalid: boolean;
+}
+
+/** Confirmação da rodada que acabou de ser fechada. */
+interface Closed {
+  round: number;
+  scores: { name: string; score: Score }[];
 }
 
 @Component({
@@ -47,6 +53,9 @@ export class RoundPage {
   readonly money = this.store.money;
   private readonly invalidNames = signal<ReadonlySet<string>>(new Set());
   private readonly closeError = signal<ActionError | null>(null);
+  private readonly content = viewChild(IonContent);
+  /** Rodada recém-fechada; some quando começam a lançar a próxima. */
+  readonly closed = signal<Closed | null>(null);
 
   /** Rodada (já fechada) em que estouraram os jogadores que ainda podem mudar de decisão. */
   readonly bustRound = computed(() => (this.view()?.nextRound ?? 1) - 1);
@@ -118,10 +127,12 @@ export class RoundPage {
       this.store.setDraftScore(name, null);
     }
     this.closeError.set(null);
+    this.closed.set(null);
   }
 
   toggleBust(r: Row): void {
     this.closeError.set(null);
+    this.closed.set(null);
     this.invalidNames.update((s) => {
       const next = new Set(s);
       next.delete(r.p.name);
@@ -160,6 +171,7 @@ export class RoundPage {
       await this.router.navigateByUrl('/fim');
       return;
     }
+    this.confirmClosed();
     const asking = (v?.players ?? []).filter((p) => p.status === 'deciding' && !p.decision && p.canReenter);
     for (const p of asking) await this.askReentry(p);
   }
@@ -178,6 +190,27 @@ export class RoundPage {
     if ((await a.onDidDismiss()).role !== 'confirm') return;
     this.store.abandonGame();
     await this.router.navigateByUrl('/novo');
+  }
+
+  dismissClosed(): void {
+    this.closed.set(null);
+  }
+
+  /** Deixa claro que a rodada foi lançada e que a tela agora é da próxima. */
+  private confirmClosed(): void {
+    const g = this.store.game();
+    const last = g?.rounds.at(-1);
+    if (!g || !last) return;
+    this.closed.set({
+      round: g.rounds.length,
+      scores: g.config.players.filter((name) => name in last.scores).map((name) => ({ name, score: last.scores[name] })),
+    });
+    void this.content()?.scrollToTop(300);
+    try {
+      navigator.vibrate?.(60);
+    } catch {
+      /* aparelho sem vibração */
+    }
   }
 
   private async askReentry(p: PlayerView): Promise<void> {

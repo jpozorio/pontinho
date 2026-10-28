@@ -1,6 +1,6 @@
 <ion-header>
   <ion-toolbar>
-    <ion-title>🃏 Rodada {{ view()?.nextRound }}</ion-title>
+    <ion-title [class.fresh]="closed()">🃏 Rodada {{ view()?.nextRound }}</ion-title>
     <ion-buttons slot="end">
       <ion-button data-abandon (click)="abandon()">Nova partida</ion-button>
     </ion-buttons>
@@ -9,6 +9,24 @@
 
 <ion-content>
   @if (view(); as v) {
+    @if (closed(); as c) {
+      <div class="closed" role="status" data-closed>
+        <div class="head">
+          <span class="ok">✅</span>
+          <div>
+            <b>Rodada {{ c.round }} lançada!</b>
+            <span>Agora é a rodada {{ v.nextRound }}</span>
+          </div>
+          <button type="button" class="dismiss" data-dismiss-closed (click)="dismissClosed()">ok</button>
+        </div>
+        <div class="sum">
+          @for (s of c.scores; track s.name) {
+            <span [class.bust]="s.score === 'bust'">{{ s.name }} {{ s.score === 'bust' ? '💥' : '+' + s.score }}</span>
+          }
+        </div>
+      </div>
+    }
+
     <div class="bar">
       <span>🎴 Dá as cartas: <b>{{ v.dealer }}</b></span>
       <span class="pot">💰 Pote <b>{{ money()?.pot ?? 0 | currency: 'BRL' }}</b></span>

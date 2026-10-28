@@ -188,6 +188,40 @@ describe('RoundPage', () => {
     expect(store.cash()!.cash).toBe(5);
   });
 
+  it('confirms the closed round and hides it once the next round starts being typed', async () => {
+    const { store, fixture, el } = setup();
+    for (const [p, v] of [['Ana', 5], ['Beto', 'bust'], ['Carla', 7]] as const) store.setDraftScore(p, v);
+    vi.spyOn(TestBed.inject(AlertController), 'create').mockResolvedValue(fake('out') as never);
+    await fixture.componentInstance.close();
+    fixture.detectChanges();
+    const box = el.querySelector('[data-closed]')!;
+    expect(box.textContent).toContain('Rodada 2 lançada!');
+    expect(box.textContent).toContain('Agora é a rodada 3');
+    expect(box.textContent).toContain('Ana +5');
+    expect(box.textContent).toContain('Beto 💥');
+    expect(el.querySelector('ion-title')!.textContent).toContain('Rodada 3');
+    type(el, 'Ana', '3');
+    fixture.detectChanges();
+    expect(el.querySelector('[data-closed]')).toBeNull();
+  });
+
+  it('hides the closed-round confirmation on ok', async () => {
+    const { store, fixture, el } = setup();
+    for (const p of ['Ana', 'Beto', 'Carla']) store.setDraftScore(p, 1);
+    await fixture.componentInstance.close();
+    fixture.detectChanges();
+    (el.querySelector('[data-dismiss-closed]') as HTMLElement).click();
+    fixture.detectChanges();
+    expect(el.querySelector('[data-closed]')).toBeNull();
+  });
+
+  it('does not confirm when the round could not be closed', async () => {
+    const { fixture, el } = setup();
+    await fixture.componentInstance.close();
+    fixture.detectChanges();
+    expect(el.querySelector('[data-closed]')).toBeNull();
+  });
+
   it('says the game is over when closing a finished game', async () => {
     const { store, fixture, el } = setup();
     vi.spyOn(store, 'closeRound').mockReturnValue(false);
